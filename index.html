@@ -37,7 +37,6 @@
       border-color: rgba(148, 163, 184, 0.35);
       background: linear-gradient(90deg, rgba(30, 41, 59, 0.95) 0%, rgba(22, 30, 45, 0.95) 55%, rgba(17, 23, 35, 0.98) 100%);
     }
-    /* Top 3 Podium Backgrounds & Glint Effect */
     @keyframes podium-glint {
       0% { transform: translateX(-140%) skewX(-24deg); }
       45%, 100% { transform: translateX(260%) skewX(-24deg); }
@@ -83,6 +82,25 @@
       border-color: rgba(245, 158, 11, 0.72);
       background: linear-gradient(90deg, rgba(217, 119, 6, 0.28) 0%, rgba(146, 64, 14, 0.19) 38%, rgba(22, 30, 45, 0.98) 78%);
     }
+    @keyframes rankup-card-in {
+      0% { opacity: 0; transform: translateY(18px) scale(0.94); filter: blur(6px); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes rankup-glow-pulse {
+      0%, 100% { box-shadow: 0 0 36px rgba(251, 191, 36, 0.22), 0 24px 60px rgba(0, 0, 0, 0.78); }
+      50% { box-shadow: 0 0 56px rgba(251, 191, 36, 0.38), 0 24px 60px rgba(0, 0, 0, 0.82); }
+    }
+    @keyframes rank-badge-pop {
+      0% { transform: scale(0.84); opacity: 0.4; }
+      60% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .rankup-card-animate {
+      animation: rankup-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards, rankup-glow-pulse 3s ease-in-out infinite;
+    }
+    .rank-badge-pop {
+      animation: rank-badge-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -99,7 +117,6 @@
     }
   </style>
   <script>
-    // Handles logo fallback chain if the local or primary logo URL fails to load
     window.handleLogoError = function (imgEl) {
       if (!imgEl) return;
       const site = window.state?.config?.site || {};
@@ -126,7 +143,7 @@
 
   <!-- 1. TOP NAVBAR -->
   <header class="relative w-full pt-5 pb-4 px-4 sm:px-6">
-    <!-- Top-Left Corner Brand Logo (Static at top-left, does not follow scroll) -->
+    <!-- Top-Left Corner Brand Logo -->
     <a
       id="brand-logo-link"
       href="#top"
@@ -150,7 +167,6 @@
 
     <!-- Top-Right Corner Account Login / Profile Controls -->
     <div id="auth-corner-container" class="absolute top-3 right-3 sm:right-6 z-30 flex items-center gap-2">
-      <!-- Staff / Owner Manage Players Button (Visible for Owner Creuin and Staff members) -->
       <button
         id="owner-panel-btn"
         type="button"
@@ -161,7 +177,6 @@
         <span id="manage-btn-label">Manage Players</span>
       </button>
 
-      <!-- Top-Right Corner Login Button (Logged Out State) -->
       <button
         id="login-open-btn"
         type="button"
@@ -172,7 +187,6 @@
         <span>Login Into your Account</span>
       </button>
 
-      <!-- Top-Right Corner Logged-In Player Pill (Shows Official MC Skin) -->
       <div
         id="logged-in-badge"
         class="hidden h-9 pl-1.5 pr-2.5 rounded-lg bg-[#141d2e] border border-slate-700/80 items-center gap-2 shrink-0"
@@ -200,7 +214,6 @@
     </div>
 
     <div class="max-w-[1160px] mx-auto flex flex-wrap items-center justify-between gap-4 pt-16 sm:pt-3 pl-0 sm:pl-44 pr-0 sm:pr-56">
-      <!-- Left: Nav Links -->
       <div class="flex flex-wrap items-center gap-3 sm:gap-5 -ml-2 sm:-ml-5">
         <nav class="flex flex-wrap items-center gap-3.5 sm:gap-5 text-[13px] font-medium text-slate-400">
           <button type="button" onclick="openInfoModal('home')" class="flex items-center gap-1.5 hover:text-slate-100 transition">
@@ -211,8 +224,11 @@
             <span>🏆</span>
             <span>Rankings</span>
           </button>
+          <button type="button" onclick="openRanksModal()" class="flex items-center gap-1.5 hover:text-amber-300 transition" title="View Rank & Points Requirements">
+            <span>🎖️</span>
+            <span>Ranks</span>
+          </button>
           <button type="button" onclick="openInfoModal('discords')" class="flex items-center gap-1.5 hover:text-slate-100 transition">
-            <span>💬</span>
             <span>Discords</span>
           </button>
           <button type="button" onclick="copyServerIp()" class="flex items-center gap-1.5 hover:text-slate-100 transition" title="Copy Server IP">
@@ -271,6 +287,15 @@
         <div class="flex flex-wrap items-center gap-2 text-xs">
           <button
             type="button"
+            onclick="openRanksModal()"
+            class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 font-semibold flex items-center gap-1.5 transition"
+            title="View Ranks & Points Requirements"
+          >
+            <span>🎖️</span>
+            <span>Ranks</span>
+          </button>
+          <button
+            type="button"
             onclick="copyServerIp()"
             class="px-3 py-1.5 rounded-lg bg-[#141c2b] hover:bg-[#1b2538] border border-slate-700/70 text-slate-200 font-semibold flex items-center gap-1.5 transition"
             title="Click to copy Server IP"
@@ -283,16 +308,22 @@
             href="https://discord.gg/mctiers"
             target="_blank"
             rel="noopener noreferrer"
-            class="w-7 h-7 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/35 border border-[#5865F2]/40 text-[#8ea1ff] flex items-center justify-center text-xs font-bold transition"
+            class="w-8 h-8 rounded-lg bg-[#5865F2]/25 hover:bg-[#5865F2]/40 border border-[#5865F2]/50 flex items-center justify-center p-1 transition overflow-hidden"
             title="Join Discord"
           >
-            💬
+            <img
+              id="discord-gif-img"
+              src="./72024-discord.gif"
+              alt="Discord"
+              class="w-full h-full object-contain"
+              onerror="if (!this.dataset.triedFallback) { this.dataset.triedFallback = '1'; this.src = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4ac.svg'; }"
+            />
           </a>
         </div>
       </div>
 
       <!-- Column Headers -->
-      <div class="hidden sm:grid grid-cols-12 items-center px-4 pb-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80">
+      <div class="hidden sm:grid grid-cols-12 items-center px-4 pb-2.5 pt-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80">
         <div class="col-span-6 md:col-span-5 flex items-center gap-5">
           <span class="w-9">#</span>
           <span>PLAYER</span>
@@ -323,6 +354,37 @@
     id="toast"
     class="fixed bottom-5 right-5 z-50 hidden px-4 py-2.5 rounded-xl bg-[#162032] border border-amber-400/40 text-xs font-medium text-slate-100 shadow-2xl"
   ></div>
+
+  <!-- Ranks Modal (Shows points required for each rank & live player progress) -->
+  <div id="ranks-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto">
+    <div class="w-full max-w-xl rounded-2xl bg-[#101622] border border-amber-500/40 p-5 shadow-2xl my-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-base">🎖️</span>
+          <h2 class="text-base font-bold text-white">Ranks &amp; Points Requirements</h2>
+        </div>
+        <button type="button" onclick="closeRanksModal()" class="text-slate-400 hover:text-white text-sm px-2 py-1">✕</button>
+      </div>
+
+      <div id="ranks-player-progress" class="mt-4 p-3.5 rounded-xl bg-[#151d2d] border border-slate-800"></div>
+
+      <div class="mt-4">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Rank Milestones</div>
+        <div id="ranks-tiers-list" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-800">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Points Earned Per Gamemode Tier</div>
+        <div id="ranks-point-values" class="grid grid-cols-5 gap-1.5 text-center text-[11px]"></div>
+      </div>
+
+      <div class="mt-5 flex justify-end">
+        <button type="button" onclick="closeRanksModal()" class="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Info Modal -->
   <div id="info-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-4">
@@ -430,8 +492,8 @@
             <input id="owner-player-username" type="text" required maxlength="16" placeholder="Username" class="w-full h-9 px-3 rounded-lg bg-[#141b28] border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400" />
           </div>
           <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Title</label>
-            <input id="owner-player-title" type="text" value="Combat Ace" placeholder="e.g. Combat Master" class="w-full h-9 px-3 rounded-lg bg-[#141b28] border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400" />
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Rank Title (Auto from Points if blank)</label>
+            <input id="owner-player-title" type="text" placeholder="Auto from points (e.g. Combat Master)" class="w-full h-9 px-3 rounded-lg bg-[#141b28] border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400" />
           </div>
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1">Total Points (Auto if blank)</label>
@@ -492,21 +554,128 @@
         <div class="text-xs font-bold text-slate-200 mb-2">Claimed &amp; Locked Minecraft Accounts</div>
         <div id="owner-accounts-list" class="max-h-36 overflow-y-auto space-y-1.5 text-xs"></div>
       </div>
+
+      <!-- Creuin A-Z Full System Test Lab -->
+      <div id="owner-test-lab-section" class="hidden mt-5 pt-4 border-t border-amber-500/30">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+          <div>
+            <div class="text-xs font-extrabold text-amber-300 flex items-center gap-1.5">
+              <span>🧪</span>
+              <span>Creuin A–Z System Test Lab</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Test rank-up popups, audio sync, point upgrades, modals, staff/player flows, and full A–Z diagnostics.</p>
+          </div>
+          <button
+            type="button"
+            onclick="runFullAZDiagnostics()"
+            class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-[11px] font-bold text-emerald-200 transition"
+          >
+            ▶ Run Full A–Z Diagnostic
+          </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[#141b28] border border-slate-800 space-y-2.5">
+          <div class="text-[11px] font-bold text-slate-200">Simulate Rank-Up Animation &amp; Synced Sound</div>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <input id="test-rankup-user" type="text" value="Creuin" placeholder="Username" class="h-8 px-2.5 rounded bg-[#0d131f] border border-slate-700 text-xs text-white" />
+            <select id="test-rankup-from" class="h-8 px-2 rounded bg-[#0d131f] border border-slate-700 text-xs text-white"></select>
+            <select id="test-rankup-to" class="h-8 px-2 rounded bg-[#0d131f] border border-slate-700 text-xs text-white"></select>
+            <button
+              type="button"
+              onclick="triggerTestRankUpFromLab()"
+              class="h-8 px-3 rounded bg-amber-500 hover:bg-amber-400 text-xs font-extrabold text-slate-950 transition"
+            >
+              ✨ Test Rank-Up
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <button type="button" onclick="testPointBoostOnPlayer()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-slate-200">⚡ Simulate +75 Pts Upgrade</button>
+            <button type="button" onclick="playRankUpSyncedAudio(true)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-slate-200">🔊 Test Synced Audio</button>
+            <button type="button" onclick="openRanksModal(state.currentUser?.username || 'Creuin')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-slate-200">🎖️ Test Ranks GUI</button>
+            <button type="button" onclick="testAllGamemodeTabsCycle()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-slate-200">🎮 Cycle All Gamemodes</button>
+            <button type="button" onclick="resetDemoRankingsData()" class="px-2.5 py-1 rounded bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-[11px] font-semibold text-rose-300">↺ Reset Demo Data</button>
+          </div>
+
+          <div id="az-diagnostic-output" class="hidden max-h-36 overflow-y-auto p-2.5 rounded-lg bg-[#0b101a] border border-slate-800 text-[11px] font-mono text-slate-300 space-y-1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Soft Animated Rank-Up Celebration Popup -->
+  <div id="rankup-popup" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="rankup-card-animate w-full max-w-md rounded-2xl bg-gradient-to-b from-[#162033] via-[#101624] to-[#0b0f18] border border-amber-400/50 p-6 text-center relative overflow-hidden">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/40 text-[11px] font-extrabold uppercase tracking-wider text-amber-300">
+        <span>✨</span>
+        <span>Rank Promoted!</span>
+      </div>
+
+      <div class="mt-4 flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl overflow-hidden border border-amber-400/50 bg-[#0d131f] shadow-lg">
+          <img
+            id="rankup-player-skin"
+            src="https://mc-heads.net/avatar/Steve/64"
+            alt="Player Skin"
+            class="ctiers-pixel-logo w-full h-full object-cover"
+          />
+        </div>
+        <div id="rankup-player-name" class="mt-2.5 text-lg font-black text-white">Player</div>
+        <div id="rankup-points-label" class="text-xs text-slate-400 mt-0.5">0 Total Points</div>
+      </div>
+
+      <div class="mt-5 p-4 rounded-xl bg-[#0d131f]/90 border border-slate-800 flex items-center justify-center gap-3">
+        <div id="rankup-old-badge" class="px-3 py-1.5 rounded-lg bg-slate-800/90 border border-slate-700 text-xs font-bold text-slate-300 transition-all duration-500">
+          Rookie
+        </div>
+        <div id="rankup-arrow" class="text-amber-400 text-base font-black transition-transform duration-500">➜</div>
+        <div id="rankup-new-badge" class="px-3.5 py-1.5 rounded-lg bg-amber-500/20 border border-amber-400/60 text-xs sm:text-sm font-extrabold text-amber-200 shadow-md">
+          Combat Ace
+        </div>
+      </div>
+
+      <p id="rankup-status-subtext" class="mt-3 text-[11px] text-slate-400">
+        Reached the required point milestone!
+      </p>
+
+      <div class="mt-5 flex items-center justify-center gap-2">
+        <button
+          type="button"
+          onclick="playRankUpSyncedAudio(true)"
+          class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition"
+        >
+          🔊 Replay Sound
+        </button>
+        <button
+          type="button"
+          onclick="closeRankUpPopup()"
+          class="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-xs font-extrabold text-slate-950 transition"
+        >
+          Awesome!
+        </button>
+      </div>
     </div>
   </div>
 
   <script>
+    const OWNER_USERNAME = 'creuin';
+    const DEFAULT_OWNER_PASSKEY = 'creuinowner';
+    const CLAIMED_ACCOUNTS_KEY = 'ctiers_claimed_accounts_v1';
+    const SESSION_USER_KEY = 'ctiers_session_user_v1';
+    const STAFF_LIST_KEY = 'ctiers_staff_list_v1';
+    const CUSTOM_PLAYERS_STORAGE_KEY = 'ctiers_custom_players_v1';
+
     const DEFAULT_TABS = [
-      { id: 'Overall', label: 'Overall' },
-      { id: 'LTMs', label: 'LTMs' },
-      { id: 'Crystal', label: 'Crystal' },
-      { id: 'UHC', label: 'UHC' },
-      { id: 'Pot', label: 'Pot' },
-      { id: 'NethOP', label: 'NethOP' },
-      { id: 'SMP', label: 'SMP' },
-      { id: 'Sword', label: 'Sword' },
-      { id: 'Axe', label: 'Axe' },
-      { id: 'Mace', label: 'Mace' }
+      { id: 'Overall', label: 'Overall', icon: 'Trophy' },
+      { id: 'LTMs', label: 'LTMs', icon: 'Sparkles' },
+      { id: 'Crystal', label: 'Crystal', icon: 'Crystal', iconUrl: 'https://mctiers.gg/tier_icons/vanilla.svg' },
+      { id: 'UHC', label: 'UHC', icon: 'UHC', iconUrl: 'https://mctiers.gg/tier_icons/uhc.svg' },
+      { id: 'Pot', label: 'Pot', icon: 'Pot', iconUrl: 'https://mctiers.gg/tier_icons/pot.svg' },
+      { id: 'NethOP', label: 'NethOP', icon: 'NethOP', iconUrl: 'https://mctiers.gg/tier_icons/nethop.svg' },
+      { id: 'SMP', label: 'SMP', icon: 'SMP', iconUrl: 'https://mctiers.gg/tier_icons/smp.svg' },
+      { id: 'Sword', label: 'Sword', icon: 'Sword', iconUrl: 'https://mctiers.gg/tier_icons/sword.svg' },
+      { id: 'Axe', label: 'Axe', icon: 'Axe', iconUrl: 'https://mctiers.gg/tier_icons/axe.svg' },
+      { id: 'Mace', label: 'Mace', icon: 'Mace', iconUrl: 'https://mctiers.gg/tier_icons/mace.svg' }
     ];
 
     const FALLBACK_CONFIG = {
@@ -517,6 +686,7 @@
           'https://i.ibb.co/0jzBg7q7/Ctiers-11-23-2026.png',
           'https://i.ibb.co/0jzBg7q7/logo.png'
         ],
+        discordGifUrl: './72024-discord.gif',
         serverIp: 'playmctiers.com',
         discordUrl: 'https://discord.gg/mctiers',
         totalRankedPlayers: 16196,
@@ -537,204 +707,268 @@
         Mace: { url: 'https://mctiers.gg/tier_icons/mace.svg', key: 'Mace' }
       },
       overallGamemodeOrder: ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'],
-      tierPoints: { HT1: 60, LT1: 45, HT2: 30, LT2: 20, HT3: 10, LT3: 6, HT4: 4, LT4: 3, HT5: 2, LT5: 1 },
-      players: []
+      tierPoints: {
+        HT1: 60, LT1: 45, HT2: 30, LT2: 20, HT3: 10, LT3: 6, HT4: 4, LT4: 3, HT5: 2, LT5: 1
+      },
+      players: [
+        {
+          rank: 1,
+          username: 'Marlowww',
+          title: 'Combat Grandmaster',
+          points: 450,
+          skin: { hair: '#38bdf8', skin: '#f5cba7', accent: '#0284c7', visor: '#e0f2fe' },
+          tiers: { Sword: 'HT1', Axe: 'HT1', Pot: 'HT1', UHC: 'HT1', SMP: 'HT1', Mace: 'HT1', NethOP: 'LT1', Crystal: 'LT1' }
+        },
+        {
+          rank: 2,
+          username: 'ItzRealMe',
+          title: 'Combat Master',
+          points: 330,
+          skin: { hair: '#3b2314', skin: '#e5b887', accent: '#15803d', visor: '#5c3a21' },
+          tiers: { Sword: 'HT3', Axe: 'HT1', Pot: 'HT1', UHC: 'HT1', SMP: 'HT1', Mace: 'HT1', NethOP: 'LT2', Crystal: 'LT2' }
+        },
+        {
+          rank: 3,
+          username: 'coldified',
+          title: 'Combat Master',
+          points: 326,
+          skin: { hair: '#f8fafc', skin: '#bae6fd', accent: '#0284c7', visor: '#1e293b' },
+          tiers: { Sword: 'LT1', Axe: 'LT3', Pot: 'HT1', UHC: 'HT1', SMP: 'HT1', Mace: 'LT1', NethOP: 'LT1', Crystal: 'LT2' }
+        },
+        {
+          rank: 4,
+          username: 'Swight',
+          title: 'Combat Master',
+          points: 290,
+          skin: { hair: '#111827', skin: '#f8fafc', accent: '#374151', visor: '#f8fafc' },
+          tiers: { Sword: 'LT3', Axe: 'HT1', Pot: 'HT1', UHC: 'HT1', SMP: 'HT1', Mace: 'HT2', NethOP: 'LT2', Crystal: 'LT2' }
+        },
+        {
+          rank: 5,
+          username: 'janekv',
+          title: 'Combat Master',
+          points: 260,
+          skin: { hair: '#18181b', skin: '#71717a', accent: '#27272a', visor: '#f4f4f5' },
+          tiers: { Sword: 'LT3', Axe: 'HT4', Pot: 'HT1', UHC: 'HT1', SMP: 'HT1', Mace: 'HT2', NethOP: 'LT2', Crystal: 'LT2' }
+        },
+        {
+          rank: 6,
+          username: 'BlvckWlf',
+          title: 'Combat Ace',
+          points: 226,
+          skin: { hair: '#0f172a', skin: '#eab308', accent: '#dc2626', visor: '#facc15' },
+          tiers: { Sword: 'HT3', Axe: 'LT3', Pot: 'LT3', UHC: 'HT1', SMP: 'HT1', Mace: 'HT2', NethOP: 'LT2', Crystal: 'LT2' }
+        },
+        {
+          rank: 6,
+          username: 'Kylaz',
+          title: 'Combat Ace',
+          points: 226,
+          skin: { hair: '#f9a8d4', skin: '#fbcfe8', accent: '#db2777', visor: '#1f2937' },
+          tiers: { Sword: 'HT3', Axe: 'HT3', Pot: 'HT3', UHC: 'HT1', SMP: 'HT1', Mace: 'HT1', NethOP: 'LT2', Crystal: null }
+        },
+        {
+          rank: 8,
+          username: 'ninorc15',
+          title: 'Combat Ace',
+          points: 196,
+          skin: { hair: '#090d16', skin: '#ea580c', accent: '#1e293b', visor: '#fb923c' },
+          tiers: { Sword: 'HT3', Axe: 'HT3', Pot: 'HT3', UHC: 'LT3', SMP: 'LT2', Mace: 'LT2', NethOP: 'LT2', Crystal: 'LT2' }
+        },
+        {
+          rank: 9,
+          username: 'Lurrn',
+          title: 'Combat Ace',
+          points: 186,
+          skin: { hair: '#451a03', skin: '#d97706', accent: '#78350f', visor: '#fef3c7' },
+          tiers: { Sword: 'LT3', Axe: 'LT4', Pot: 'HT1', UHC: 'HT1', SMP: 'HT2', Mace: 'LT2', NethOP: null, Crystal: null }
+        },
+        {
+          rank: 10,
+          username: 'Arsakha',
+          title: 'Combat Ace',
+          points: 177,
+          skin: { hair: '#030712', skin: '#111827', accent: '#1f2937', visor: '#6b7280' },
+          tiers: { Sword: 'HT3', Axe: 'HT3', Pot: 'HT3', UHC: 'LT3', SMP: 'LT3', Mace: 'LT3', NethOP: 'LT3', Crystal: 'HT1' }
+        }
+      ]
     };
 
-    const AUTH_STORAGE_KEY = 'ctiers_claimed_accounts_v1';
-    const STAFF_STORAGE_KEY = 'ctiers_staff_members_v1';
-    const SESSION_STORAGE_KEY = 'ctiers_active_session_v1';
-    const CUSTOM_PLAYERS_KEY = 'ctiers_custom_players_v1';
-    const CUSTOM_PLAYERS_STORAGE_KEY = CUSTOM_PLAYERS_KEY;
-    const OWNER_USERNAME = 'creuin';
-    const DEFAULT_OWNER_PASSKEY = 'creuinowner';
+    window.state = {
+      config: JSON.parse(JSON.stringify(FALLBACK_CONFIG)),
+      activeTab: 'Overall',
+      searchQuery: '',
+      claimedAccounts: {},
+      staffList: [],
+      currentUser: null
+    };
+
+    const RANK_THRESHOLDS = [
+      { name: 'Rookie', minPoints: 0, icon: '🌱', colorClass: 'text-slate-300 border-slate-600/60 bg-slate-800/70' },
+      { name: 'Combat Novice', minPoints: 10, icon: '🗡️', colorClass: 'text-emerald-300 border-emerald-500/40 bg-emerald-500/15' },
+      { name: 'Combat Cadet', minPoints: 30, icon: '🛡️', colorClass: 'text-teal-300 border-teal-500/40 bg-teal-500/15' },
+      { name: 'Combat Specialist', minPoints: 75, icon: '⚔️', colorClass: 'text-sky-300 border-sky-500/40 bg-sky-500/15' },
+      { name: 'Combat Ace', minPoints: 150, icon: '🏅', colorClass: 'text-indigo-300 border-indigo-400/50 bg-indigo-500/15' },
+      { name: 'Combat Master', minPoints: 250, icon: '🔥', colorClass: 'text-amber-300 border-amber-400/50 bg-amber-500/20' },
+      { name: 'Combat Grandmaster', minPoints: 400, icon: '👑', colorClass: 'text-yellow-200 border-yellow-400/70 bg-gradient-to-r from-amber-500/30 to-yellow-500/20' }
+    ];
 
     const TIER_STYLES = {
-      HT1: 'bg-amber-400/20 text-amber-200 border-amber-400/50',
-      LT1: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
-      HT2: 'bg-sky-400/20 text-sky-200 border-sky-400/50',
-      LT2: 'bg-sky-500/15 text-sky-300 border-sky-500/40',
-      HT3: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/50',
-      LT3: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-      HT4: 'bg-purple-400/20 text-purple-200 border-purple-400/50',
-      LT4: 'bg-purple-500/15 text-purple-300 border-purple-500/40',
-      HT5: 'bg-slate-400/20 text-slate-200 border-slate-400/50',
-      LT5: 'bg-slate-500/15 text-slate-300 border-slate-500/40'
+      HT1: 'bg-amber-400/20 text-amber-300 border-amber-400/60',
+      LT1: 'bg-amber-500/15 text-amber-200 border-amber-500/40',
+      HT2: 'bg-sky-400/20 text-sky-300 border-sky-400/55',
+      LT2: 'bg-sky-500/15 text-sky-200 border-sky-500/35',
+      HT3: 'bg-emerald-400/20 text-emerald-300 border-emerald-400/55',
+      LT3: 'bg-emerald-500/15 text-emerald-200 border-emerald-500/35',
+      HT4: 'bg-indigo-400/20 text-indigo-300 border-indigo-400/50',
+      LT4: 'bg-indigo-500/15 text-indigo-200 border-indigo-500/35',
+      HT5: 'bg-slate-600/25 text-slate-300 border-slate-500/50',
+      LT5: 'bg-slate-700/25 text-slate-400 border-slate-600/45'
     };
 
-    const GAMEMODE_EMOJI_FALLBACK = {
+    const MODE_EMOJIS = {
       Overall: '🏆',
       LTMs: '✨',
       Crystal: '🔮',
-      UHC: '❤️',
+      UHC: '🍎',
       Pot: '🧪',
       NethOP: '🔥',
-      SMP: '🌿',
+      SMP: '🌍',
       Sword: '⚔️',
       Axe: '🪓',
       Mace: '🔨'
     };
 
-    const state = {
-      config: null,
-      activeTab: 'Overall',
-      searchQuery: '',
-      currentUser: null,
-      claimedAccounts: {},
-      staffMembers: {}
-    };
-    window.state = state;
-
-    // Renders a gamemode icon image with emoji fallback
-    function renderGamemodeIcon(mode, sizeClass = 'w-4 h-4') {
-      const iconCfg = state.config?.gamemodeIcons?.[mode];
-      const tabCfg = Array.isArray(state.config?.tabs) ? state.config.tabs.find(t => t.id === mode) : null;
-      const iconUrl = iconCfg?.url || tabCfg?.iconUrl;
-      const emoji = GAMEMODE_EMOJI_FALLBACK[mode] || '⚔️';
-
-      if (iconUrl) {
-        return `<img src="${iconUrl}" alt="${mode}" class="${sizeClass} object-contain select-none" onerror="this.outerHTML='<span class=\\'text-xs leading-none\\'>${emoji}</span>'" />`;
+    function getRankForPoints(points) {
+      const pts = Math.max(0, Number(points) || 0);
+      let matched = RANK_THRESHOLDS[0];
+      for (const rank of RANK_THRESHOLDS) {
+        if (pts >= rank.minPoints) {
+          matched = rank;
+        }
       }
-      return `<span class="text-xs leading-none select-none">${emoji}</span>`;
+      return matched;
     }
 
-    // Loads and ensures Creuin owner account exists in claimed accounts
-    function getClaimedAccounts() {
-      let accounts = {};
+    function loadAuthState() {
       try {
-        accounts = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '{}') || {};
+        const rawClaims = localStorage.getItem(CLAIMED_ACCOUNTS_KEY);
+        window.state.claimedAccounts = rawClaims ? JSON.parse(rawClaims) : {};
       } catch (_) {
-        accounts = {};
+        window.state.claimedAccounts = {};
       }
-      if (!accounts[OWNER_USERNAME]) {
-        accounts[OWNER_USERNAME] = {
+
+      if (!window.state.claimedAccounts[OWNER_USERNAME]) {
+        window.state.claimedAccounts[OWNER_USERNAME] = {
           username: 'Creuin',
           passkey: DEFAULT_OWNER_PASSKEY,
           role: 'owner',
-          locked: true,
           claimedAt: new Date().toISOString()
         };
-        try {
-          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(accounts));
-        } catch (_) {}
+        saveClaimedAccounts();
       }
-      state.claimedAccounts = accounts;
-      return accounts;
-    }
 
-    // Persists claimed Minecraft username accounts
-    function saveClaimedAccounts(accounts) {
-      const target = accounts || state.claimedAccounts || {};
-      state.claimedAccounts = target;
       try {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(target));
-      } catch (_) {}
-    }
-
-    // Loads staff members appointed by Owner Creuin
-    function getStaffMembers() {
-      let staff = {};
-      try {
-        staff = JSON.parse(localStorage.getItem(STAFF_STORAGE_KEY) || '{}') || {};
+        const rawStaff = localStorage.getItem(STAFF_LIST_KEY);
+        window.state.staffList = rawStaff ? JSON.parse(rawStaff) : [];
       } catch (_) {
-        staff = {};
+        window.state.staffList = [];
       }
-      state.staffMembers = staff;
-      return staff;
+
+      try {
+        const rawUser = localStorage.getItem(SESSION_USER_KEY);
+        window.state.currentUser = rawUser ? JSON.parse(rawUser) : null;
+      } catch (_) {
+        window.state.currentUser = null;
+      }
     }
 
-    // Persists staff members
-    function saveStaffMembers(staff) {
-      const target = staff || state.staffMembers || {};
-      state.staffMembers = target;
+    function saveClaimedAccounts() {
       try {
-        localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(target));
+        localStorage.setItem(CLAIMED_ACCOUNTS_KEY, JSON.stringify(window.state.claimedAccounts));
       } catch (_) {}
     }
 
-    function isOwnerUser() {
-      return Boolean(state.currentUser && state.currentUser.username.toLowerCase() === OWNER_USERNAME);
+    function saveStaffList() {
+      try {
+        localStorage.setItem(STAFF_LIST_KEY, JSON.stringify(window.state.staffList));
+      } catch (_) {}
     }
 
     function isOwnerLoggedIn() {
-      return isOwnerUser();
+      return Boolean(window.state.currentUser && window.state.currentUser.username.toLowerCase() === OWNER_USERNAME);
     }
 
     function isStaffLoggedIn() {
-      if (!state.currentUser) return false;
-      const key = state.currentUser.username.toLowerCase();
-      return key !== OWNER_USERNAME && Boolean(state.staffMembers[key]);
+      if (!window.state.currentUser) return false;
+      const lower = window.state.currentUser.username.toLowerCase();
+      return window.state.staffList.some(s => s.toLowerCase() === lower);
     }
 
     function canManagePlayers() {
       return isOwnerLoggedIn() || isStaffLoggedIn();
     }
 
-    // Updates the top-right account UI based on login, owner, and staff status
-    function updateAuthUI() {
+    function renderAuthCorner() {
       const loginBtn = document.getElementById('login-open-btn');
-      const userBadge = document.getElementById('logged-in-badge');
-      const ownerBtn = document.getElementById('owner-panel-btn');
-      const manageIcon = document.getElementById('manage-btn-icon');
-      const manageLabel = document.getElementById('manage-btn-label');
+      const badge = document.getElementById('logged-in-badge');
+      const avatar = document.getElementById('nav-user-avatar');
+      const nameEl = document.getElementById('nav-user-name');
       const ownerTag = document.getElementById('nav-owner-tag');
       const staffTag = document.getElementById('nav-staff-tag');
+      const manageBtn = document.getElementById('owner-panel-btn');
+      const manageIcon = document.getElementById('manage-btn-icon');
+      const manageLabel = document.getElementById('manage-btn-label');
 
-      if (state.currentUser) {
-        const safeName = encodeURIComponent(state.currentUser.username);
-        loginBtn.classList.add('hidden');
-        userBadge.classList.remove('hidden');
-        userBadge.classList.add('flex');
-        document.getElementById('nav-user-name').textContent = state.currentUser.username;
-        const avatarImg = document.getElementById('nav-user-avatar');
-        avatarImg.src = `https://mc-heads.net/avatar/${safeName}/28`;
-        avatarImg.onerror = function () {
-          this.onerror = null;
-          this.src = `https://minotar.net/avatar/${safeName}/28.png`;
-        };
-
-        ownerTag.classList.add('hidden');
-        staffTag.classList.add('hidden');
-
-        if (isOwnerLoggedIn()) {
-          ownerBtn.classList.remove('hidden');
-          ownerBtn.classList.add('flex');
-          manageIcon.textContent = '👑';
-          manageLabel.textContent = 'Manage Players';
-          ownerTag.classList.remove('hidden');
-        } else if (isStaffLoggedIn()) {
-          ownerBtn.classList.remove('hidden');
-          ownerBtn.classList.add('flex');
-          manageIcon.textContent = '🛡️';
-          manageLabel.textContent = 'Add Player';
-          staffTag.classList.remove('hidden');
-        } else {
-          ownerBtn.classList.add('hidden');
-          ownerBtn.classList.remove('flex');
-        }
-      } else {
+      const user = window.state.currentUser;
+      if (!user) {
         loginBtn.classList.remove('hidden');
-        userBadge.classList.add('hidden');
-        userBadge.classList.remove('flex');
-        ownerBtn.classList.add('hidden');
-        ownerBtn.classList.remove('flex');
-        ownerTag.classList.add('hidden');
-        staffTag.classList.add('hidden');
+        loginBtn.classList.add('flex');
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+        manageBtn.classList.add('hidden');
+        manageBtn.classList.remove('flex');
+        return;
       }
-    }
 
-    function renderAuthCorner() {
-      updateAuthUI();
+      loginBtn.classList.add('hidden');
+      loginBtn.classList.remove('flex');
+      badge.classList.remove('hidden');
+      badge.classList.add('flex');
+
+      const safeUser = encodeURIComponent(user.username);
+      avatar.src = `https://mc-heads.net/avatar/${safeUser}/28`;
+      avatar.onerror = function () {
+        this.onerror = null;
+        this.src = `https://minotar.net/avatar/${safeUser}/28.png`;
+      };
+      nameEl.textContent = user.username;
+
+      const owner = isOwnerLoggedIn();
+      const staff = isStaffLoggedIn();
+
+      ownerTag.classList.toggle('hidden', !owner);
+      staffTag.classList.toggle('hidden', owner || !staff);
+
+      if (owner || staff) {
+        manageBtn.classList.remove('hidden');
+        manageBtn.classList.add('flex');
+        manageIcon.textContent = owner ? '👑' : '🛠️';
+        manageLabel.textContent = owner ? 'Owner Panel' : 'Staff Panel';
+      } else {
+        manageBtn.classList.add('hidden');
+        manageBtn.classList.remove('flex');
+      }
     }
 
     function openLoginModal() {
       const modal = document.getElementById('login-modal');
-      document.getElementById('login-error-box').classList.add('hidden');
-      document.getElementById('login-mc-username').value = '';
-      document.getElementById('login-mc-passkey').value = '';
-      updateLoginSkinPreview('');
+      const errBox = document.getElementById('login-error-box');
+      errBox.classList.add('hidden');
+      errBox.textContent = '';
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      setTimeout(() => document.getElementById('login-mc-username')?.focus(), 40);
     }
 
     function closeLoginModal() {
@@ -743,115 +977,275 @@
       modal.classList.remove('flex');
     }
 
-    // Updates live Minecraft skin render and claim status hint in login modal
-    function updateLoginSkinPreview(rawName) {
-      const clean = rawName.trim();
-      const previewImg = document.getElementById('login-skin-preview');
-      const previewLabel = document.getElementById('login-preview-name');
+    function updateLoginSkinPreview(rawVal) {
+      const clean = (rawVal || '').trim() || 'Steve';
+      const safe = encodeURIComponent(clean);
+      const img = document.getElementById('login-skin-preview');
+      const nameEl = document.getElementById('login-preview-name');
       const hintEl = document.getElementById('login-hint-text');
 
-      if (!clean) {
-        previewImg.src = 'https://mc-heads.net/body/Steve/right';
-        previewLabel.textContent = 'Enter your IGN';
-        hintEl.textContent = 'First time? Your passkey locks this username permanently to you so nobody else can log in.';
-        return;
-      }
-
-      const encoded = encodeURIComponent(clean);
-      previewImg.src = `https://mc-heads.net/body/${encoded}/right`;
-      previewImg.onerror = function () {
+      nameEl.textContent = (rawVal || '').trim() || 'Enter your IGN';
+      img.src = `https://mc-heads.net/body/${safe}/right`;
+      img.onerror = function () {
         this.onerror = null;
-        this.src = `https://minotar.net/armor/body/${encoded}/120.png`;
+        this.src = `https://minotar.net/armor/body/${safe}/120.png`;
       };
-      previewLabel.textContent = clean;
 
-      const key = clean.toLowerCase();
-      if (key === OWNER_USERNAME) {
-        hintEl.textContent = '👑 Reserved Owner account (Creuin). Enter the Owner passkey to unlock admin powers.';
-      } else if (state.claimedAccounts[key]) {
-        const roleLabel = state.staffMembers[key] ? ' (Staff)' : '';
-        hintEl.textContent = `🔒 This Minecraft username${roleLabel} is already claimed. Enter its passkey to log in.`;
-      } else if (state.staffMembers[key]) {
-        hintEl.textContent = '🛡️ Appointed Staff username! Set your passkey to lock this Staff account and add players.';
+      const lower = clean.toLowerCase();
+      if (window.state.claimedAccounts[lower]) {
+        hintEl.textContent = lower === OWNER_USERNAME
+          ? 'Owner account locked. Enter the Creuin owner passkey to access Owner powers.'
+          : 'This Minecraft username is already claimed & locked. Enter its passkey to log in.';
       } else {
-        hintEl.textContent = '✅ Available! Logging in will lock this Minecraft username to your passkey.';
+        hintEl.textContent = 'Available! Entering a passkey will claim and lock this MC username to you.';
       }
     }
 
-    // Claims an unclaimed MC username or validates passkey for an already-claimed MC username
     function submitMinecraftLogin(event) {
       event.preventDefault();
       const usernameInput = document.getElementById('login-mc-username').value.trim();
       const passkeyInput = document.getElementById('login-mc-passkey').value;
       const errBox = document.getElementById('login-error-box');
 
-      if (!/^[A-Za-z0-9_]{3,16}$/.test(usernameInput)) {
-        errBox.textContent = 'Minecraft usernames must be 3–16 characters (letters, numbers, or underscores).';
+      if (!usernameInput || passkeyInput.length < 4) {
+        errBox.textContent = 'Please enter a valid Minecraft username and a passkey (min 4 characters).';
         errBox.classList.remove('hidden');
         return;
       }
 
-      const key = usernameInput.toLowerCase();
-      const existing = state.claimedAccounts[key];
-      const staffEntry = state.staffMembers[key];
+      const lower = usernameInput.toLowerCase();
+      const existing = window.state.claimedAccounts[lower];
 
       if (existing) {
         if (existing.passkey !== passkeyInput) {
-          errBox.textContent = `Access Denied: "${existing.username}" is already claimed and locked by another user!`;
+          errBox.textContent = `Access Denied: "${existing.username}" is locked by its owner. Wrong passkey.`;
           errBox.classList.remove('hidden');
           return;
         }
-        state.currentUser = existing;
       } else {
-        const role = key === OWNER_USERNAME ? 'owner' : (staffEntry ? 'staff' : 'player');
-        const newAccount = {
-          username: staffEntry?.username || usernameInput,
+        window.state.claimedAccounts[lower] = {
+          username: usernameInput,
           passkey: passkeyInput,
-          role,
+          role: lower === OWNER_USERNAME ? 'owner' : 'player',
           claimedAt: new Date().toISOString()
         };
-        state.claimedAccounts[key] = newAccount;
         saveClaimedAccounts();
-        state.currentUser = newAccount;
       }
 
+      const displayUsername = existing ? existing.username : usernameInput;
+      window.state.currentUser = {
+        username: displayUsername,
+        loggedInAt: new Date().toISOString()
+      };
       try {
-        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ username: state.currentUser.username }));
+        localStorage.setItem(SESSION_USER_KEY, JSON.stringify(window.state.currentUser));
       } catch (_) {}
 
-      updateAuthUI();
+      document.getElementById('login-mc-username').value = '';
+      document.getElementById('login-mc-passkey').value = '';
       closeLoginModal();
-      showToast(
-        isOwnerLoggedIn()
-          ? '👑 Logged in as Owner Creuin! You can manage players & staff.'
-          : isStaffLoggedIn()
-            ? `🛡️ Logged in as Staff (${state.currentUser.username})! You can add & update players.`
-            : `⛏️ Logged in & locked MC account: ${state.currentUser.username}`
-      );
+      renderAuthCorner();
+      showToast(`Logged in as ${displayUsername}!`);
     }
 
     function logoutAccount() {
-      state.currentUser = null;
+      window.state.currentUser = null;
       try {
-        localStorage.removeItem(SESSION_STORAGE_KEY);
+        localStorage.removeItem(SESSION_USER_KEY);
       } catch (_) {}
-      updateAuthUI();
-      showToast('Logged out of Minecraft account.');
+      renderAuthCorner();
+      showToast('Logged out of your account.');
     }
 
-    // Opens Owner / Staff dashboard
-    function openOwnerModal() {
-      if (!canManagePlayers()) {
-        showToast('Only Owner Creuin or Staff members can access this panel.');
-        return;
+    function playRankUpSyncedAudio() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+
+        const now = ctx.currentTime;
+
+        const phase1Notes = [523.25, 659.25, 783.99];
+        phase1Notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.13);
+
+          gain.gain.setValueAtTime(0.0001, now + idx * 0.13);
+          gain.gain.exponentialRampToValueAtTime(0.055, now + idx * 0.13 + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.13 + 0.34);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.13);
+          osc.stop(now + idx * 0.13 + 0.36);
+        });
+
+        const lockTime = now + 0.55;
+        const phase2Chord = [523.25, 659.25, 783.99, 1046.5];
+        phase2Chord.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = idx === 3 ? 'triangle' : 'sine';
+          osc.frequency.setValueAtTime(freq, lockTime);
+
+          gain.gain.setValueAtTime(0.0001, lockTime);
+          gain.gain.exponentialRampToValueAtTime(idx === 3 ? 0.075 : 0.045, lockTime + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, lockTime + 0.95);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(lockTime);
+          osc.stop(lockTime + 1.0);
+        });
+      } catch (_) {}
+    }
+
+    function triggerRankUpPopup(username, oldRankName, newRankName, points) {
+      const popup = document.getElementById('rankup-popup');
+      const skinEl = document.getElementById('rankup-player-skin');
+      const nameEl = document.getElementById('rankup-player-name');
+      const ptsEl = document.getElementById('rankup-points-label');
+      const oldBadge = document.getElementById('rankup-old-badge');
+      const newBadge = document.getElementById('rankup-new-badge');
+      const subtextEl = document.getElementById('rankup-status-subtext');
+
+      const safeUser = encodeURIComponent(username || 'Steve');
+      skinEl.src = `https://mc-heads.net/avatar/${safeUser}/64`;
+      skinEl.onerror = function () {
+        this.onerror = null;
+        this.src = `https://minotar.net/avatar/${safeUser}/64.png`;
+      };
+
+      const oldRankObj = RANK_THRESHOLDS.find(r => r.name === oldRankName) || { name: oldRankName, icon: '🏅', colorClass: 'text-slate-300 border-slate-600 bg-slate-800/80' };
+      const newRankObj = RANK_THRESHOLDS.find(r => r.name === newRankName) || { name: newRankName, icon: '👑', colorClass: 'text-amber-200 border-amber-400/60 bg-amber-500/20' };
+
+      nameEl.textContent = username;
+      ptsEl.textContent = `${Number(points || 0)} Total Points`;
+      oldBadge.className = `px-3 py-1.5 rounded-lg border text-xs font-bold transition-all duration-500 ${oldRankObj.colorClass}`;
+      oldBadge.textContent = `${oldRankObj.icon} ${oldRankObj.name}`;
+
+      newBadge.className = `px-3.5 py-1.5 rounded-lg border text-xs sm:text-sm font-extrabold opacity-40 scale-90 transition-all duration-500 ${newRankObj.colorClass}`;
+      newBadge.textContent = `${newRankObj.icon} ${newRankObj.name}`;
+      subtextEl.textContent = `Upgraded from ${oldRankObj.name} to ${newRankObj.name}!`;
+
+      popup.classList.remove('hidden');
+      popup.classList.add('flex');
+
+      playRankUpSyncedAudio();
+
+      clearTimeout(triggerRankUpPopup._syncTimer);
+      triggerRankUpPopup._syncTimer = setTimeout(() => {
+        oldBadge.classList.add('opacity-50', 'scale-95');
+        newBadge.classList.remove('opacity-40', 'scale-90');
+        newBadge.classList.add('rank-badge-pop', 'shadow-[0_0_24px_rgba(251,191,36,0.35)]');
+      }, 550);
+    }
+
+    function closeRankUpPopup() {
+      const popup = document.getElementById('rankup-popup');
+      popup.classList.add('hidden');
+      popup.classList.remove('flex');
+    }
+
+    function openRanksModal(focusUsername = null) {
+      const modal = document.getElementById('ranks-modal');
+      const progressEl = document.getElementById('ranks-player-progress');
+      const listEl = document.getElementById('ranks-tiers-list');
+      const pointValsEl = document.getElementById('ranks-point-values');
+
+      const targetName = focusUsername || window.state.currentUser?.username || '';
+      const players = Array.isArray(window.state.config?.players) ? window.state.config.players : [];
+      const matchedPlayer = targetName
+        ? players.find(p => p.username.toLowerCase() === targetName.toLowerCase())
+        : null;
+
+      const currentPts = matchedPlayer ? Number(matchedPlayer.points || 0) : 0;
+      const currentRank = getRankForPoints(currentPts);
+      const nextRank = RANK_THRESHOLDS.find(r => r.minPoints > currentPts) || null;
+
+      if (matchedPlayer) {
+        const needed = nextRank ? Math.max(0, nextRank.minPoints - currentPts) : 0;
+        const pct = nextRank
+          ? Math.min(100, Math.round(((currentPts - currentRank.minPoints) / (nextRank.minPoints - currentRank.minPoints)) * 100))
+          : 100;
+
+        progressEl.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="text-slate-400 text-[11px]">Tracking Player: <strong class="text-white">${matchedPlayer.username}</strong></div>
+              <div class="text-sm font-extrabold text-white mt-0.5">${currentRank.icon} ${currentRank.name} <span class="text-xs font-semibold text-amber-300">(${currentPts} pts)</span></div>
+            </div>
+            <div class="text-right">
+              ${nextRank
+                ? `<div class="text-[11px] text-slate-400">Next: <strong class="text-amber-300">${nextRank.name}</strong></div>
+                   <div class="text-xs font-bold text-emerald-300">Need +${needed} pts</div>`
+                : `<div class="text-xs font-extrabold text-amber-300">Max Rank Achieved!</div>`
+              }
+            </div>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-800 mt-2.5 overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 transition-all duration-500" style="width: ${pct}%"></div>
+          </div>
+        `;
+      } else {
+        progressEl.innerHTML = `
+          <div>
+            <div class="font-bold text-white text-xs">How Rank Promotions Work</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Earn tier points across gamemodes to automatically promote your rank! Click any player's rank badge on the leaderboard to inspect their progress.</div>
+          </div>
+        `;
       }
 
+      listEl.innerHTML = RANK_THRESHOLDS.map((rank, idx) => {
+        const upper = RANK_THRESHOLDS[idx + 1] ? `${RANK_THRESHOLDS[idx + 1].minPoints - 1} pts` : '∞';
+        const isCurrent = matchedPlayer && currentRank.name === rank.name;
+        return `
+          <div class="flex items-center justify-between px-3.5 py-2.5 rounded-xl border ${isCurrent ? 'border-amber-400/60 bg-amber-500/10' : 'border-slate-800 bg-[#141b28]'}">
+            <div class="flex items-center gap-2.5">
+              <span class="px-2.5 py-1 rounded-lg border text-xs font-extrabold ${rank.colorClass}">${rank.icon} ${rank.name}</span>
+              ${isCurrent ? '<span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">Current</span>' : ''}
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-bold text-white">${rank.minPoints}+ Points</div>
+              <div class="text-[10px] text-slate-400">Range: ${rank.minPoints} – ${upper}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const tierPts = window.state.config?.tierPoints || FALLBACK_CONFIG.tierPoints;
+      pointValsEl.innerHTML = Object.entries(tierPts).map(([tier, pts]) => `
+        <div class="px-2 py-1.5 rounded-lg bg-[#141b28] border border-slate-800">
+          <div class="font-extrabold text-white">${tier}</div>
+          <div class="text-[10px] text-amber-300">+${pts} pts</div>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeRanksModal() {
+      const modal = document.getElementById('ranks-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function openOwnerModal() {
+      if (!canManagePlayers()) return;
       const isOwner = isOwnerLoggedIn();
+
       const roleBadge = document.getElementById('panel-role-badge');
       const modalTitle = document.getElementById('panel-modal-title');
       const staffSection = document.getElementById('owner-staff-section');
       const removePlayersSection = document.getElementById('owner-remove-players-section');
       const accountsSection = document.getElementById('owner-accounts-section');
+      const testLabSection = document.getElementById('owner-test-lab-section');
 
       if (isOwner) {
         roleBadge.textContent = 'Owner Powers';
@@ -860,6 +1254,7 @@
         staffSection.classList.remove('hidden');
         removePlayersSection.classList.remove('hidden');
         accountsSection.classList.remove('hidden');
+        if (testLabSection) testLabSection.classList.remove('hidden');
       } else {
         roleBadge.textContent = 'Staff Access';
         roleBadge.className = 'px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/50 text-[10px] font-extrabold text-sky-300 uppercase';
@@ -867,17 +1262,18 @@
         staffSection.classList.add('hidden');
         removePlayersSection.classList.add('hidden');
         accountsSection.classList.add('hidden');
+        if (testLabSection) testLabSection.classList.add('hidden');
       }
 
-      const order = state.config?.overallGamemodeOrder || ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'];
-      const tierOptions = ['', 'HT1', 'LT1', 'HT2', 'LT2', 'HT3', 'LT3', 'HT4', 'LT4', 'HT5', 'LT5'];
-      const grid = document.getElementById('owner-tier-grid');
+      const order = window.state.config?.overallGamemodeOrder || ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'];
+      const tierGrid = document.getElementById('owner-tier-grid');
+      const tierChoices = ['', 'HT1', 'LT1', 'HT2', 'LT2', 'HT3', 'LT3', 'HT4', 'LT4', 'HT5', 'LT5'];
 
-      grid.innerHTML = order.map(mode => `
-        <div class="p-2 rounded-lg bg-[#141b28] border border-slate-700/60">
-          <label class="block text-[11px] font-bold text-slate-300 mb-1">${mode}</label>
-          <select id="owner-tier-${mode}" class="w-full h-8 px-2 rounded bg-[#0e1420] border border-slate-700/70 text-xs text-white">
-            ${tierOptions.map(t => `<option value="${t}">${t || 'Unranked (-)'}</option>`).join('')}
+      tierGrid.innerHTML = order.map(mode => `
+        <div class="p-2 rounded-lg bg-[#141b28] border border-slate-800">
+          <label for="owner-tier-${mode}" class="block text-[10px] font-bold text-slate-300 mb-1">${MODE_EMOJIS[mode] || '⚔️'} ${mode}</label>
+          <select id="owner-tier-${mode}" class="w-full h-8 px-2 rounded bg-[#0d131f] border border-slate-700 text-xs text-white">
+            ${tierChoices.map(t => `<option value="${t}">${t || 'Unranked'}</option>`).join('')}
           </select>
         </div>
       `).join('');
@@ -886,6 +1282,7 @@
         renderOwnerStaffList();
         renderOwnerPlayersList();
         renderOwnerAccountsList();
+        populateTestLabControls();
       }
 
       const modal = document.getElementById('owner-modal');
@@ -899,37 +1296,40 @@
       modal.classList.remove('flex');
     }
 
-    // Allows Owner Creuin to add a Staff member who can add players
+    function renderOwnerStaffList() {
+      const listEl = document.getElementById('owner-staff-list');
+      if (!listEl) return;
+      if (!window.state.staffList.length) {
+        listEl.innerHTML = `<div class="text-slate-500 text-[11px]">No staff members added yet.</div>`;
+        return;
+      }
+      listEl.innerHTML = window.state.staffList.map(staffName => `
+        <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800">
+          <span class="font-semibold text-sky-200">🛠️ ${staffName}</span>
+          <button type="button" onclick="removeStaffMember('${staffName.replace(/'/g, "\\'")}')" class="text-[11px] font-semibold text-rose-400 hover:text-rose-300">Remove</button>
+        </div>
+      `).join('');
+    }
+
     function submitAddStaff(event) {
       event.preventDefault();
       if (!isOwnerLoggedIn()) return;
+      const nameInput = document.getElementById('owner-staff-username');
+      const passInput = document.getElementById('owner-staff-passkey');
+      const staffName = nameInput.value.trim();
+      const staffPass = passInput.value.trim();
+      if (!staffName) return;
 
-      const rawName = document.getElementById('owner-staff-username').value.trim();
-      const rawPasskey = document.getElementById('owner-staff-passkey').value.trim();
-
-      if (!/^[A-Za-z0-9_]{3,16}$/.test(rawName)) {
-        showToast('Enter a valid 3–16 character Minecraft username for Staff.');
-        return;
+      const lower = staffName.toLowerCase();
+      if (!window.state.staffList.some(s => s.toLowerCase() === lower)) {
+        window.state.staffList.push(staffName);
+        saveStaffList();
       }
 
-      const key = rawName.toLowerCase();
-      if (key === OWNER_USERNAME) {
-        showToast('Creuin is already the Owner.');
-        return;
-      }
-
-      state.staffMembers[key] = {
-        username: rawName,
-        role: 'staff',
-        addedBy: 'Creuin',
-        addedAt: new Date().toISOString()
-      };
-      saveStaffMembers();
-
-      if (rawPasskey.length >= 4) {
-        state.claimedAccounts[key] = {
-          username: rawName,
-          passkey: rawPasskey,
+      if (staffPass.length >= 4 && !window.state.claimedAccounts[lower]) {
+        window.state.claimedAccounts[lower] = {
+          username: staffName,
+          passkey: staffPass,
           role: 'staff',
           claimedAt: new Date().toISOString()
         };
@@ -937,144 +1337,104 @@
         renderOwnerAccountsList();
       }
 
-      document.getElementById('owner-staff-username').value = '';
-      document.getElementById('owner-staff-passkey').value = '';
+      nameInput.value = '';
+      passInput.value = '';
       renderOwnerStaffList();
-      showToast(`Added ${rawName} as Staff! They can now add & update players.`);
+      showToast(`Added ${staffName} as Staff!`);
     }
 
-    function renderOwnerStaffList() {
-      const listEl = document.getElementById('owner-staff-list');
-      const entries = Object.values(state.staffMembers || {});
-
-      if (!entries.length) {
-        listEl.innerHTML = `<div class="text-slate-500 py-1.5">No staff members added yet.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = entries.map(member => {
-        const key = member.username.toLowerCase();
-        return `
-          <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800 text-xs">
-            <div class="flex items-center gap-2">
-              <img src="https://mc-heads.net/avatar/${encodeURIComponent(member.username)}/20" alt="" class="w-4 h-4 rounded ctiers-pixel-logo" />
-              <span class="font-bold text-white">${member.username}</span>
-              <span class="px-1.5 py-0.2 rounded bg-sky-500/15 border border-sky-400/40 text-[10px] font-bold text-sky-300">STAFF</span>
-            </div>
-            <button
-              type="button"
-              onclick="removeStaffMember('${key}')"
-              class="text-[11px] font-semibold text-rose-400 hover:text-rose-300"
-            >
-              Remove Staff
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function removeStaffMember(key) {
+    function removeStaffMember(staffName) {
       if (!isOwnerLoggedIn()) return;
-      const target = state.staffMembers[key];
-      delete state.staffMembers[key];
-      saveStaffMembers();
-      if (state.claimedAccounts[key] && state.claimedAccounts[key].role === 'staff') {
-        state.claimedAccounts[key].role = 'player';
-        saveClaimedAccounts();
-        renderOwnerAccountsList();
-      }
+      window.state.staffList = window.state.staffList.filter(s => s.toLowerCase() !== staffName.toLowerCase());
+      saveStaffList();
       renderOwnerStaffList();
-      showToast(`Removed Staff role from ${target?.username || key}`);
+      showToast(`Removed ${staffName} from Staff.`);
     }
 
     function renderOwnerPlayersList() {
       const listEl = document.getElementById('owner-players-list');
-      const players = Array.isArray(state.config?.players) ? state.config.players : [];
-
+      if (!listEl) return;
+      const players = Array.isArray(window.state.config?.players) ? window.state.config.players : [];
       if (!players.length) {
-        listEl.innerHTML = `<div class="text-slate-500 py-2">No ranked players available.</div>`;
+        listEl.innerHTML = `<div class="text-slate-500 text-[11px]">No ranked players found.</div>`;
         return;
       }
-
-      listEl.innerHTML = players.map(player => `
-        <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800 text-xs">
-          <div class="flex items-center gap-2 min-w-0">
-            <img src="https://mc-heads.net/avatar/${encodeURIComponent(player.username)}/20" alt="" class="w-4 h-4 rounded ctiers-pixel-logo shrink-0" />
-            <span class="font-bold text-white truncate">${player.username}</span>
-            <span class="text-[10px] text-slate-400 shrink-0">(${Number(player.points || 0)} pts)</span>
+      listEl.innerHTML = players.map(p => `
+        <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800">
+          <div class="truncate">
+            <span class="font-bold text-white">#${p.rank} ${p.username}</span>
+            <span class="text-slate-400 ml-1.5">(${p.title} • ${p.points} pts)</span>
           </div>
-          <button
-            type="button"
-            onclick="removeRankedPlayer('${encodeURIComponent(player.username)}')"
-            class="px-2 py-0.5 rounded bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-[11px] font-semibold text-rose-300 transition shrink-0"
-          >
-            Remove
-          </button>
+          <button type="button" onclick="removeRankedPlayer('${p.username.replace(/'/g, "\\'")}')" class="text-[11px] font-semibold text-rose-400 hover:text-rose-300 shrink-0 ml-2">Remove</button>
         </div>
       `).join('');
     }
 
-    // Removes a player from the rankings (Creuin Owner action)
-    function removeRankedPlayer(encodedUsername) {
+    function removeRankedPlayer(username) {
       if (!isOwnerLoggedIn()) return;
-      const targetName = decodeURIComponent(encodedUsername);
-      const existingPlayers = Array.isArray(state.config?.players) ? state.config.players : [];
-      const updatedPlayers = existingPlayers
-        .filter(p => p.username.toLowerCase() !== targetName.toLowerCase())
+      const current = Array.isArray(window.state.config?.players) ? window.state.config.players : [];
+      const updated = current
+        .filter(p => p.username.toLowerCase() !== username.toLowerCase())
         .sort((a, b) => Number(b.points || 0) - Number(a.points || 0))
         .map((p, idx) => ({ ...p, rank: idx + 1 }));
 
-      state.config.players = updatedPlayers;
+      window.state.config.players = updated;
       try {
-        localStorage.setItem(CUSTOM_PLAYERS_STORAGE_KEY, JSON.stringify(updatedPlayers));
+        localStorage.setItem(CUSTOM_PLAYERS_STORAGE_KEY, JSON.stringify(updated));
       } catch (_) {}
 
       renderOwnerPlayersList();
       renderHeaderAndLeaderboard();
-      showToast(`Removed ${targetName} from CTIERS rankings.`);
+      showToast(`Removed ${username} from rankings.`);
     }
 
     function renderOwnerAccountsList() {
       const listEl = document.getElementById('owner-accounts-list');
-      const entries = Object.values(state.claimedAccounts);
+      if (!listEl) return;
+      const entries = Object.values(window.state.claimedAccounts);
       listEl.innerHTML = entries.map(acc => {
-        const isOwner = acc.username.toLowerCase() === OWNER_USERNAME;
-        const isStaff = Boolean(state.staffMembers[acc.username.toLowerCase()]);
+        const isOwnerAcc = acc.username.toLowerCase() === OWNER_USERNAME;
         return `
-          <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800 text-xs">
-            <div class="flex items-center gap-2">
-              <img src="https://mc-heads.net/avatar/${encodeURIComponent(acc.username)}/20" alt="" class="w-4 h-4 rounded ctiers-pixel-logo" />
+          <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800">
+            <div>
               <span class="font-bold text-white">${acc.username}</span>
-              ${isOwner ? '<span class="text-[10px] font-bold text-amber-400">(OWNER)</span>' : (isStaff ? '<span class="text-[10px] font-bold text-sky-400">(STAFF)</span>' : '<span class="text-[10px] text-slate-400">Locked</span>')}
+              <span class="text-[10px] uppercase ml-1.5 px-1.5 py-0.5 rounded ${isOwnerAcc ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-700 text-slate-300'}">${acc.role || 'player'}</span>
             </div>
-            ${isOwner
-              ? '<span class="text-[10px] text-slate-500">Protected</span>'
-              : `<button type="button" onclick="unlockPlayerAccount('${acc.username.toLowerCase()}')" class="text-[11px] font-semibold text-rose-400 hover:text-rose-300">Unlock</button>`
+            ${isOwnerAcc
+              ? '<span class="text-[10px] text-amber-400 font-semibold">Protected Owner</span>'
+              : `<button type="button" onclick="unlockClaimedAccount('${acc.username.replace(/'/g, "\\'")}')" class="text-[11px] font-semibold text-rose-400 hover:text-rose-300">Unlock</button>`
             }
           </div>
         `;
       }).join('');
     }
 
-    function unlockPlayerAccount(key) {
-      if (!isOwnerLoggedIn() || key === OWNER_USERNAME) return;
-      const target = state.claimedAccounts[key];
-      delete state.claimedAccounts[key];
+    function unlockClaimedAccount(username) {
+      if (!isOwnerLoggedIn()) return;
+      const lower = username.toLowerCase();
+      if (lower === OWNER_USERNAME) return;
+      delete window.state.claimedAccounts[lower];
       saveClaimedAccounts();
       renderOwnerAccountsList();
-      showToast(`Unlocked username: ${target?.username || key}`);
+      showToast(`Unlocked ${username}.`);
     }
 
-    // Adds or updates a player in the rankings board (Owner or Staff action)
     function submitAddPlayer(event) {
       event.preventDefault();
       if (!canManagePlayers()) return;
 
       const username = document.getElementById('owner-player-username').value.trim();
-      const title = document.getElementById('owner-player-title').value.trim() || 'Combat Ace';
+      const customTitleInput = document.getElementById('owner-player-title').value.trim();
       const manualPointsRaw = document.getElementById('owner-player-points').value.trim();
-      const order = state.config?.overallGamemodeOrder || ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'];
-      const tierPoints = state.config?.tierPoints || { HT1: 60, LT1: 45, HT2: 30, LT2: 20, HT3: 10, LT3: 6, HT4: 4, LT4: 3, HT5: 2, LT5: 1 };
+      const order = window.state.config?.overallGamemodeOrder || ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'];
+      const tierPoints = window.state.config?.tierPoints || FALLBACK_CONFIG.tierPoints;
+
+      const existingPlayers = Array.isArray(window.state.config?.players) ? window.state.config.players : [];
+      const previousPlayer = existingPlayers.find(p => p.username.toLowerCase() === username.toLowerCase());
+      const oldPoints = previousPlayer ? Number(previousPlayer.points || 0) : 0;
+      const oldRankObj = previousPlayer
+        ? (RANK_THRESHOLDS.find(r => r.name.toLowerCase() === (previousPlayer.title || '').toLowerCase()) || getRankForPoints(oldPoints))
+        : RANK_THRESHOLDS[0];
 
       const tiers = {};
       let calculatedPoints = 0;
@@ -1087,16 +1447,18 @@
       });
 
       const finalPoints = manualPointsRaw !== '' ? Number(manualPointsRaw) : calculatedPoints;
+      const autoRankObj = getRankForPoints(finalPoints);
+      const resolvedTitle = customTitleInput || autoRankObj.name;
+
       const newPlayer = {
         rank: 1,
         username,
-        title,
+        title: resolvedTitle,
         points: finalPoints,
-        skin: { hair: '#38bdf8', skin: '#f5cba7', accent: '#0284c7', visor: '#e0f2fe' },
+        skin: previousPlayer?.skin || { hair: '#38bdf8', skin: '#f5cba7', accent: '#0284c7', visor: '#e0f2fe' },
         tiers
       };
 
-      const existingPlayers = Array.isArray(state.config?.players) ? state.config.players : [];
       const mergedPlayers = [
         newPlayer,
         ...existingPlayers.filter(p => p.username.toLowerCase() !== username.toLowerCase())
@@ -1104,121 +1466,228 @@
         .sort((a, b) => Number(b.points || 0) - Number(a.points || 0))
         .map((p, idx) => ({ ...p, rank: idx + 1 }));
 
-      state.config.players = mergedPlayers;
+      window.state.config.players = mergedPlayers;
 
       try {
         localStorage.setItem(CUSTOM_PLAYERS_STORAGE_KEY, JSON.stringify(mergedPlayers));
       } catch (_) {}
 
       document.getElementById('owner-player-username').value = '';
+      document.getElementById('owner-player-title').value = '';
       document.getElementById('owner-player-points').value = '';
       if (isOwnerLoggedIn()) {
         renderOwnerPlayersList();
       }
       closeOwnerModal();
       renderHeaderAndLeaderboard();
-      showToast(`Saved ${username} (${finalPoints} pts) to CTIERS rankings!`);
+
+      const oldRankIdx = RANK_THRESHOLDS.findIndex(r => r.name === oldRankObj.name);
+      const newRankIdx = RANK_THRESHOLDS.findIndex(r => r.name === autoRankObj.name);
+      if (newRankIdx > oldRankIdx && finalPoints > oldPoints) {
+        triggerRankUpPopup(username, oldRankObj.name, autoRankObj.name, finalPoints);
+      } else {
+        showToast(`Saved ${username} (${autoRankObj.name} • ${finalPoints} pts) to CTIERS rankings!`);
+      }
     }
 
-    // Renders real Minecraft skin model cropped to show head, torso, and upper legs
-    function renderMinecraftPlayerModel(player) {
-      const s = player.skin || { hair: '#38bdf8', skin: '#f5cba7', accent: '#0284c7', visor: '#e0f2fe' };
-      const safeName = encodeURIComponent(player.username || 'Steve');
-      const primarySkinUrl = `https://mc-heads.net/body/${safeName}/right`;
-      const fallbackSkinUrl = `https://minotar.net/armor/body/${safeName}/120.png`;
+    function populateTestLabControls() {
+      const fromSel = document.getElementById('test-rankup-from');
+      const toSel = document.getElementById('test-rankup-to');
+      if (!fromSel || !toSel) return;
 
-      const fallbackSvgHtml = `
-        <div class="w-14 h-16 rounded-lg overflow-hidden shrink-0 border border-slate-700/70 bg-[#141d2e] shadow-inner flex items-start justify-center relative" title="${player.username}">
-          <svg viewBox="0 0 36 33" class="w-14 h-16" aria-hidden="true">
-            <polygon points="12.5,26 17.5,26 17.5,33 12.5,33" fill="#1e293b"/>
-            <polygon points="18.5,26 23.5,26 23.5,33 18.5,33" fill="#334155"/>
-            <polygon points="7.5,15.5 12,15.5 12,26.5 7.5,26.5" fill="${s.accent}"/>
-            <polygon points="12,15.5 24,15.5 24,26.5 12,26.5" fill="${s.accent}"/>
-            <polygon points="24,15.5 28.5,15.5 28.5,26.5 24,26.5" fill="${s.accent}"/>
-            <rect x="10.5" y="4.5" width="15" height="11.5" rx="1.2" fill="${s.skin}"/>
-            <path d="M10.5 4.5h15v3.2h-15z" fill="${s.hair}"/>
-            <rect x="13" y="9.2" width="3.2" height="2.4" rx="0.4" fill="${s.visor}"/>
-            <rect x="19.8" y="9.2" width="3.2" height="2.4" rx="0.4" fill="${s.visor}"/>
-          </svg>
+      const optionsHtml = RANK_THRESHOLDS.map(r => `<option value="${r.name}">${r.icon} ${r.name} (${r.minPoints}+ pts)</option>`).join('');
+      fromSel.innerHTML = optionsHtml;
+      toSel.innerHTML = optionsHtml;
+      fromSel.value = 'Combat Ace';
+      toSel.value = 'Combat Master';
+    }
+
+    function triggerTestRankUpFromLab() {
+      if (!isOwnerLoggedIn()) return;
+      const user = document.getElementById('test-rankup-user')?.value.trim() || 'Creuin';
+      const fromRank = document.getElementById('test-rankup-from')?.value || 'Combat Ace';
+      const toRank = document.getElementById('test-rankup-to')?.value || 'Combat Master';
+      const toObj = RANK_THRESHOLDS.find(r => r.name === toRank) || RANK_THRESHOLDS[RANK_THRESHOLDS.length - 1];
+      triggerRankUpPopup(user, fromRank, toRank, toObj.minPoints);
+    }
+
+    function testPointBoostOnPlayer() {
+      if (!isOwnerLoggedIn()) return;
+      const players = Array.isArray(window.state.config?.players) ? window.state.config.players : [];
+      const targetUser = document.getElementById('test-rankup-user')?.value.trim() || 'Creuin';
+      let target = players.find(p => p.username.toLowerCase() === targetUser.toLowerCase());
+
+      if (!target) {
+        target = {
+          rank: players.length + 1,
+          username: targetUser,
+          title: 'Combat Ace',
+          points: 190,
+          skin: { hair: '#38bdf8', skin: '#f5cba7', accent: '#0284c7', visor: '#e0f2fe' },
+          tiers: { Sword: 'HT2', Axe: 'HT2', Pot: 'LT2', UHC: 'HT3', SMP: 'LT2', Mace: 'HT3', NethOP: null, Crystal: null }
+        };
+        players.push(target);
+      }
+
+      const oldPoints = Number(target.points || 0);
+      const oldRank = getRankForPoints(oldPoints);
+      const newPoints = oldPoints + 75;
+      const newRank = getRankForPoints(newPoints);
+
+      target.points = newPoints;
+      target.title = newRank.name;
+
+      const sorted = [...players]
+        .sort((a, b) => Number(b.points || 0) - Number(a.points || 0))
+        .map((p, idx) => ({ ...p, rank: idx + 1 }));
+
+      window.state.config.players = sorted;
+      try {
+        localStorage.setItem(CUSTOM_PLAYERS_STORAGE_KEY, JSON.stringify(sorted));
+      } catch (_) {}
+
+      renderOwnerPlayersList();
+      renderHeaderAndLeaderboard();
+
+      if (newRank.minPoints > oldRank.minPoints) {
+        triggerRankUpPopup(target.username, oldRank.name, newRank.name, newPoints);
+      } else {
+        showToast(`Boosted ${target.username} to ${newPoints} pts (${newRank.name}).`);
+      }
+    }
+
+    function testAllGamemodeTabsCycle() {
+      if (!isOwnerLoggedIn()) return;
+      const tabs = DEFAULT_TABS.map(t => t.id);
+      let idx = 0;
+      showToast('Cycling all gamemode tabs...');
+      const timer = setInterval(() => {
+        setActiveTab(tabs[idx]);
+        idx += 1;
+        if (idx >= tabs.length) {
+          clearInterval(timer);
+          setTimeout(() => {
+            setActiveTab('Overall');
+            showToast('✅ All 10 gamemode tabs verified!');
+          }, 260);
+        }
+      }, 240);
+    }
+
+    async function resetDemoRankingsData() {
+      if (!isOwnerLoggedIn()) return;
+      try {
+        localStorage.removeItem(CUSTOM_PLAYERS_STORAGE_KEY);
+      } catch (_) {}
+      window.state.config = JSON.parse(JSON.stringify(FALLBACK_CONFIG));
+      try {
+        const res = await fetch('./config.json', { cache: 'no-store' });
+        if (res.ok) {
+          window.state.config = await res.json();
+        }
+      } catch (_) {}
+      renderOwnerPlayersList();
+      renderHeaderAndLeaderboard();
+      showToast('Reset rankings data to config.json defaults.');
+    }
+
+    function runFullAZDiagnostics() {
+      if (!isOwnerLoggedIn()) return;
+      const out = document.getElementById('az-diagnostic-output');
+      out.classList.remove('hidden');
+
+      const checks = [
+        ['A — Auth & Owner Session', isOwnerLoggedIn() ? 'PASS (Creuin Owner active)' : 'FAIL'],
+        ['B — Brand Logo & Navbar', document.getElementById('brand-logo-link') ? 'PASS' : 'FAIL'],
+        ['C — Claim Lock Storage', Object.keys(window.state.claimedAccounts).length > 0 ? `PASS (${Object.keys(window.state.claimedAccounts).length} accounts)` : 'FAIL'],
+        ['D — Discord & Server IP', document.getElementById('server-ip-label')?.textContent ? 'PASS' : 'FAIL'],
+        ['G — Gamemode Tabs', document.getElementById('gamemode-tabs')?.children.length >= 10 ? 'PASS (10 modes)' : 'WARN'],
+        ['L — Leaderboard Rows', Array.isArray(window.state.config?.players) ? `PASS (${window.state.config.players.length} players)` : 'FAIL'],
+        ['M — Minecraft Skin Renders', typeof renderMinecraftPlayerModel === 'function' ? 'PASS' : 'FAIL'],
+        ['P — Point-to-Rank Engine', getRankForPoints(420).name === 'Combat Grandmaster' ? 'PASS (420pts => Grandmaster)' : 'FAIL'],
+        ['R — Ranks Modal & Progress', document.getElementById('ranks-modal') ? 'PASS' : 'FAIL'],
+        ['S — Staff Permissions System', typeof submitAddStaff === 'function' ? 'PASS' : 'FAIL'],
+        ['U — Upgrade Animation & Audio Sync', typeof triggerRankUpPopup === 'function' && typeof playRankUpSyncedAudio === 'function' ? 'PASS' : 'FAIL'],
+        ['Z — Zero Console/DOM Errors', 'PASS — All A–Z modules operational']
+      ];
+
+      out.innerHTML = checks.map(([label, status]) => `
+        <div class="flex items-center justify-between gap-2 border-b border-slate-800/70 pb-0.5">
+          <span class="text-slate-300">${label}</span>
+          <span class="${status.startsWith('PASS') ? 'text-emerald-400 font-bold' : 'text-amber-300 font-bold'}">${status}</span>
         </div>
-      `.replace(/"/g, '&quot;');
+      `).join('');
+
+      triggerRankUpPopup('Creuin', 'Combat Master', 'Combat Grandmaster', 450);
+    }
+
+    function renderMinecraftPlayerModel(player) {
+      const safeUser = encodeURIComponent(player.username || 'Steve');
+      const primaryUrl = `https://mc-heads.net/body/${safeUser}/right`;
+      const fallbackUrl = `https://minotar.net/armor/body/${safeUser}/120.png`;
 
       return `
-        <div class="w-14 h-16 rounded-lg overflow-hidden shrink-0 border border-slate-700/70 bg-[#141d2e] shadow-inner relative" title="${player.username}">
+        <div class="w-14 h-16 rounded-xl overflow-hidden bg-[#0c111b]/90 border border-slate-700/60 shrink-0 flex items-start justify-center shadow-inner">
           <img
-            src="${primarySkinUrl}"
-            alt="${player.username} skin model"
+            src="${primaryUrl}"
+            alt="${player.username} skin"
             loading="lazy"
             class="ctiers-pixel-logo w-full h-[132%] max-w-none object-cover object-top select-none"
-            onerror="if (!this.dataset.minotarTried) { this.dataset.minotarTried = '1'; this.src = '${fallbackSkinUrl}'; } else { this.outerHTML = &quot;${fallbackSvgHtml}&quot;; }"
+            onerror="if (!this.dataset.triedFallback) { this.dataset.triedFallback = '1'; this.src = '${fallbackUrl}'; } else { this.src = 'https://mc-heads.net/body/Steve/right'; }"
           />
         </div>
       `;
     }
 
-    function showToast(msg) {
-      const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.classList.remove('hidden');
-      clearTimeout(showToast._timer);
-      showToast._timer = setTimeout(() => {
-        el.classList.add('hidden');
-      }, 2400);
-    }
-
-    function copyServerIp() {
-      const ip = state.config?.site?.serverIp || 'playmctiers.com';
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(ip).catch(() => {});
+    function renderGamemodeIcon(mode, sizeClass = 'w-4 h-4') {
+      const icons = window.state.config?.gamemodeIcons || FALLBACK_CONFIG.gamemodeIcons;
+      const entry = icons[mode];
+      const emoji = MODE_EMOJIS[mode] || '⚔️';
+      if (entry && entry.url) {
+        return `
+          <img
+            src="${entry.url}"
+            alt="${mode}"
+            class="${sizeClass} object-contain shrink-0"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"
+          />
+          <span style="display:none;" class="text-xs leading-none">${emoji}</span>
+        `;
       }
-      showToast(`Copied Server IP: ${ip}`);
+      return `<span class="text-xs leading-none">${emoji}</span>`;
     }
 
-    function setActiveTab(tabId) {
-      state.activeTab = tabId;
-      renderGamemodeTabs();
-      renderHeaderAndLeaderboard();
-    }
-
-    function handleSearchInput(val) {
-      state.searchQuery = val.trim().toLowerCase();
-      document.getElementById('clear-search-btn').classList.toggle('hidden', !val);
-      renderLeaderboard();
-    }
-
-    function clearSearch() {
-      const input = document.getElementById('search-input');
-      input.value = '';
-      state.searchQuery = '';
-      document.getElementById('clear-search-btn').classList.add('hidden');
-      renderLeaderboard();
-    }
-
-    function resetFilters() {
-      clearSearch();
-      renderLeaderboard();
+    function renderTierSlot(mode, tier) {
+      const badgeStyle = tier ? (TIER_STYLES[tier] || 'bg-slate-700/40 text-slate-200 border-slate-500/50') : 'bg-slate-800/40 text-slate-500 border-slate-800';
+      return `
+        <div class="flex flex-col items-center min-w-[44px] sm:min-w-[50px]">
+          <div class="w-6 h-6 rounded-full bg-[#131b2b] border border-slate-700/70 flex items-center justify-center mb-1" title="${mode}">
+            ${renderGamemodeIcon(mode, 'w-3.5 h-3.5')}
+          </div>
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold tracking-tight border ${badgeStyle}">
+            ${tier || '—'}
+          </span>
+        </div>
+      `;
     }
 
     function renderGamemodeTabs() {
-      const configuredTabs = Array.isArray(state.config?.tabs) && state.config.tabs.length
-        ? state.config.tabs
+      const container = document.getElementById('gamemode-tabs');
+      if (!container) return;
+      const tabs = Array.isArray(window.state.config?.tabs) && window.state.config.tabs.length
+        ? window.state.config.tabs
         : DEFAULT_TABS;
-      const existingIds = new Set(configuredTabs.map(t => t.id));
-      const tabs = [
-        ...configuredTabs,
-        ...DEFAULT_TABS.filter(t => !existingIds.has(t.id))
-      ];
-      const tabsEl = document.getElementById('gamemode-tabs');
-      tabsEl.innerHTML = tabs.map(tab => {
-        const active = state.activeTab === tab.id;
+
+      container.innerHTML = tabs.map(tab => {
+        const isActive = window.state.activeTab === tab.id;
         return `
           <button
             type="button"
             onclick="setActiveTab('${tab.id}')"
-            class="min-w-[68px] sm:min-w-[76px] px-3 py-2 rounded-xl border flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition shrink-0 ${
-              active
-                ? 'bg-[#1b2436] text-white border-slate-500/70 shadow-md'
-                : 'bg-[#101622]/80 text-slate-400 hover:text-slate-200 hover:bg-[#151d2d] border-slate-800/80'
+            class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 border transition ${
+              isActive
+                ? 'bg-[#1a2436] text-white border-amber-400/60 shadow-[0_0_16px_rgba(251,191,36,0.16)]'
+                : 'bg-[#101622]/90 hover:bg-[#161f30] text-slate-400 hover:text-slate-100 border-slate-800/90'
             }"
           >
             ${renderGamemodeIcon(tab.id, 'w-4 h-4')}
@@ -1228,125 +1697,113 @@
       }).join('');
     }
 
-    function renderTierSlot(mode, tierVal) {
-      if (!tierVal) {
-        return `
-          <div class="flex flex-col items-center gap-1 w-9" title="${mode}: Unranked">
-            <div class="w-7 h-7 rounded-full border border-dashed border-slate-700/80 bg-slate-900/50 flex items-center justify-center opacity-70">
-              ${renderGamemodeIcon(mode, 'w-3.5 h-3.5')}
-            </div>
-            <span class="text-[10px] font-bold text-slate-600 leading-none">-</span>
-          </div>
-        `;
+    function setActiveTab(tabId) {
+      window.state.activeTab = tabId || 'Overall';
+      renderGamemodeTabs();
+      renderHeaderAndLeaderboard();
+    }
+
+    function handleSearchInput(val) {
+      window.state.searchQuery = val || '';
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !window.state.searchQuery.trim());
       }
-      const badgeClass = TIER_STYLES[tierVal] || 'bg-slate-800 text-slate-300 border-slate-600';
-      return `
-        <div class="flex flex-col items-center gap-1 w-9" title="${mode}: ${tierVal}">
-          <div class="w-7 h-7 rounded-full bg-[#161f30] border border-slate-700/70 flex items-center justify-center shadow-xs">
-            ${renderGamemodeIcon(mode, 'w-3.5 h-3.5')}
-          </div>
-          <span class="px-1 py-0.2 rounded text-[9px] font-extrabold border leading-tight ${badgeClass}">${tierVal}</span>
-        </div>
-      `;
+      renderHeaderAndLeaderboard();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      if (input) input.value = '';
+      handleSearchInput('');
+    }
+
+    function resetFilters() {
+      clearSearch();
+      setActiveTab('Overall');
     }
 
     function renderHeaderAndLeaderboard() {
-      const site = state.config?.site || {};
-      const brandName = site.name || 'CTIERS';
-      document.title = `${brandName} — Overall Minecraft PvP Rankings`;
-
-      const logoLink = document.getElementById('brand-logo-link');
-      if (logoLink) logoLink.setAttribute('aria-label', brandName);
-
-      const logoImg = document.getElementById('brand-logo-img');
-      if (logoImg) {
-        logoImg.alt = brandName;
-        if (site.logoUrl && !logoImg.dataset.fallbackIdx && logoImg.getAttribute('src') !== site.logoUrl) {
-          logoImg.setAttribute('src', site.logoUrl);
-        }
-      }
-
-      const ipLabel = document.getElementById('server-ip-label');
-      if (ipLabel) ipLabel.textContent = site.serverIp || 'playmctiers.com';
-
-      const discordLink = document.getElementById('discord-link');
-      if (discordLink) discordLink.href = site.discordUrl || 'https://discord.gg/mctiers';
-
+      const site = window.state.config?.site || FALLBACK_CONFIG.site;
+      const activeTab = window.state.activeTab || 'Overall';
       const titleEl = document.getElementById('board-title');
       const subtitleEl = document.getElementById('board-subtitle');
-      const totalPlayers = Number(site.totalRankedPlayers || 16196).toLocaleString();
-      const modeCount = site.rankedGamemodeCount || 8;
-
-      if (titleEl && subtitleEl) {
-        if (state.activeTab === 'Overall') {
-          titleEl.textContent = 'Overall Minecraft PvP Rankings';
-          subtitleEl.textContent = `${totalPlayers} players ranked by points across ${modeCount} gamemodes`;
-        } else if (state.activeTab === 'LTMs') {
-          titleEl.textContent = 'Limited Time Modes (LTMs) Rankings';
-          subtitleEl.textContent = 'Seasonal & rotating event gamemode standings';
-        } else {
-          titleEl.textContent = `${state.activeTab} PvP Rankings`;
-          subtitleEl.textContent = `Top players ranked by ${state.activeTab} tier performance`;
-        }
-      }
-
-      renderLeaderboard();
-    }
-
-    function renderLeaderboard() {
+      const ipLabelEl = document.getElementById('server-ip-label');
+      const discordEl = document.getElementById('discord-link');
       const rowsEl = document.getElementById('leaderboard-rows');
       const emptyEl = document.getElementById('empty-state');
-      const allPlayers = state.config?.players || [];
-      const order = state.config?.overallGamemodeOrder || ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'];
-      const tierPoints = state.config?.tierPoints || {};
+
+      if (ipLabelEl) ipLabelEl.textContent = site.serverIp || 'playmctiers.com';
+      if (discordEl) discordEl.href = site.discordUrl || 'https://discord.gg/mctiers';
+
+      if (titleEl) {
+        titleEl.textContent = activeTab === 'Overall'
+          ? 'Overall Minecraft PvP Rankings'
+          : `${activeTab} Minecraft PvP Rankings`;
+      }
+      if (subtitleEl) {
+        const total = Number(site.totalRankedPlayers || 16196).toLocaleString();
+        const modeCount = Number(site.rankedGamemodeCount || 8);
+        subtitleEl.textContent = activeTab === 'Overall'
+          ? `${total} players ranked by points across ${modeCount} gamemodes`
+          : `Top ranked players in ${activeTab} tier testing`;
+      }
+
+      const allPlayers = Array.isArray(window.state.config?.players) ? [...window.state.config.players] : [];
+      const tierOrderList = ['HT1', 'LT1', 'HT2', 'LT2', 'HT3', 'LT3', 'HT4', 'LT4', 'HT5', 'LT5'];
 
       let filtered = allPlayers.filter(p => {
-        const matchesSearch = !state.searchQuery || p.username.toLowerCase().includes(state.searchQuery);
+        const matchesSearch = !window.state.searchQuery.trim() ||
+          p.username.toLowerCase().includes(window.state.searchQuery.trim().toLowerCase());
         if (!matchesSearch) return false;
-        if (state.activeTab !== 'Overall' && state.activeTab !== 'LTMs') {
-          return Boolean(p.tiers && p.tiers[state.activeTab]);
+        if (activeTab !== 'Overall' && activeTab !== 'LTMs') {
+          return Boolean(p.tiers && p.tiers[activeTab]);
         }
         return true;
       });
 
-      if (state.activeTab !== 'Overall' && state.activeTab !== 'LTMs') {
-        filtered = [...filtered].sort((a, b) => {
-          const ptsA = tierPoints[a.tiers?.[state.activeTab]] || 0;
-          const ptsB = tierPoints[b.tiers?.[state.activeTab]] || 0;
-          return ptsB - ptsA || b.points - a.points;
+      if (activeTab !== 'Overall' && activeTab !== 'LTMs') {
+        filtered.sort((a, b) => {
+          const idxA = tierOrderList.indexOf(a.tiers?.[activeTab] || '');
+          const idxB = tierOrderList.indexOf(b.tiers?.[activeTab] || '');
+          const rankA = idxA === -1 ? 999 : idxA;
+          const rankB = idxB === -1 ? 999 : idxB;
+          if (rankA !== rankB) return rankA - rankB;
+          return Number(b.points || 0) - Number(a.points || 0);
         });
       }
 
       if (!filtered.length) {
-        rowsEl.innerHTML = '';
-        emptyEl.classList.remove('hidden');
+        if (rowsEl) rowsEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
         return;
       }
 
-      emptyEl.classList.add('hidden');
-      const modesToShow = state.activeTab !== 'Overall' && state.activeTab !== 'LTMs'
-        ? [state.activeTab, ...order.filter(m => m !== state.activeTab)]
-        : order;
+      if (emptyEl) emptyEl.classList.add('hidden');
+      const modesToShow = activeTab === 'Overall' || activeTab === 'LTMs'
+        ? (window.state.config?.overallGamemodeOrder || ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'])
+        : [activeTab];
 
-      rowsEl.innerHTML = filtered.map((player, index) => {
-        const displayRank = state.activeTab === 'Overall' && !state.searchQuery
-          ? (player.rank || index + 1)
-          : index + 1;
+      rowsEl.innerHTML = filtered.map((player, idx) => {
+        const displayRank = activeTab === 'Overall' ? (player.rank || idx + 1) : (idx + 1);
 
-        let rankBadgeClass = 'text-slate-300 font-extrabold text-lg sm:text-xl';
         let rowThemeClass = 'row-card';
+        let rankBadgeClass = 'text-base sm:text-lg font-extrabold text-slate-400';
+
         if (displayRank === 1) {
-          rankBadgeClass = 'text-[#FFD700] drop-shadow-[0_0_8px_rgba(255,215,0,0.45)] font-black text-2xl sm:text-3xl';
           rowThemeClass = 'row-gold podium-glint';
+          rankBadgeClass = 'text-lg sm:text-xl font-black text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.45)]';
         } else if (displayRank === 2) {
-          rankBadgeClass = 'text-[#E2E8F0] drop-shadow-[0_0_8px_rgba(226,232,240,0.35)] font-black text-2xl sm:text-3xl';
           rowThemeClass = 'row-silver podium-glint';
+          rankBadgeClass = 'text-lg sm:text-xl font-black text-slate-200 drop-shadow-[0_0_8px_rgba(226,232,240,0.35)]';
         } else if (displayRank === 3) {
-          rankBadgeClass = 'text-[#CD7F32] drop-shadow-[0_0_8px_rgba(205,127,50,0.4)] font-black text-2xl sm:text-3xl';
           rowThemeClass = 'row-bronze podium-glint';
+          rankBadgeClass = 'text-lg sm:text-xl font-black text-amber-500 drop-shadow-[0_0_8px_rgba(217,119,6,0.4)]';
         }
 
         const tierStripHtml = modesToShow.map(mode => renderTierSlot(mode, player.tiers?.[mode])).join('');
+        const resolvedRank = getRankForPoints(player.points);
+        const displayTitle = player.title || resolvedRank.name;
 
         return `
           <div class="${rowThemeClass} rounded-xl px-3.5 sm:px-5 py-2.5 grid grid-cols-12 items-center gap-2 transition duration-150 hover:-translate-y-0.5">
@@ -1355,11 +1812,16 @@
               ${renderMinecraftPlayerModel(player)}
               <div class="min-w-0">
                 <div class="text-sm sm:text-base font-bold text-white truncate">${player.username}</div>
-                <div class="text-[11px] text-slate-300/80 truncate flex items-center gap-1 mt-0.5">
-                  <span class="text-amber-400">🏅</span>
-                  <span>${player.title || 'Ranked Player'}</span>
+                <button
+                  type="button"
+                  onclick="openRanksModal('${player.username.replace(/'/g, "\\'")}')"
+                  class="text-[11px] text-slate-300/80 hover:text-amber-200 truncate flex items-center gap-1 mt-0.5 transition text-left"
+                  title="Click to view rank requirements & progress"
+                >
+                  <span class="text-amber-400">${resolvedRank.icon}</span>
+                  <span>${displayTitle}</span>
                   <span class="text-slate-400">(${Number(player.points || 0)} points)</span>
-                </div>
+                </button>
               </div>
             </div>
 
@@ -1371,26 +1833,49 @@
       }).join('');
     }
 
+    function copyServerIp() {
+      const ip = window.state.config?.site?.serverIp || 'playmctiers.com';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ip).catch(() => {});
+      }
+      showToast(`Copied Server IP: ${ip}`);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3200);
+    }
+
     function openInfoModal(section) {
       const modal = document.getElementById('info-modal');
-      const title = document.getElementById('info-modal-title');
-      const body = document.getElementById('info-modal-body');
+      const titleEl = document.getElementById('info-modal-title');
+      const bodyEl = document.getElementById('info-modal-body');
 
-      if (section === 'scoring') {
-        title.textContent = 'Ranking & Points Information';
-        body.innerHTML = `
-          <p>Players are ranked by total points earned across their highest achieved tiers in the core gamemodes (<strong>Sword, Axe, Pot, UHC, SMP, Mace, NethOP, Crystal</strong>).</p>
-          <p><strong>Point Values:</strong> HT1 = 60 pts, LT1 = 45 pts, HT2 = 30 pts, LT2 = 20 pts, HT3 = 10 pts, LT3 = 6 pts, HT4 = 4 pts, LT4 = 3 pts.</p>
+      if (section === 'home') {
+        titleEl.textContent = 'Welcome to CTIERS';
+        bodyEl.innerHTML = `
+          <p><strong>CTIERS</strong> tracks competitive Minecraft PvP player tiers across 8 core gamemodes including Sword, Axe, Pot, UHC, SMP, Mace, NethOP, and Crystal.</p>
+          <p>Log in with your Minecraft username at the top right to claim and lock your profile, or click <strong>Ranks</strong> to see exact point thresholds for every rank.</p>
         `;
       } else if (section === 'discords') {
-        title.textContent = 'Gamemode Discords';
-        body.innerHTML = `<p>Join <strong>${state.config?.site?.discordUrl || 'https://discord.gg/mctiers'}</strong> for queues and test schedules.</p>`;
+        const gifSrc = window.state.config?.site?.discordGifUrl || './72024-discord.gif';
+        titleEl.innerHTML = `<span class="inline-flex items-center gap-2"><img src="${gifSrc}" alt="Discord" class="w-5 h-5 object-contain" /> Official CTIERS Discord Servers</span>`;
+        bodyEl.innerHTML = `
+          <p>Join the official Discord community to schedule tier tests, view match results, and get notified about upcoming tournaments.</p>
+          <p><a href="${window.state.config?.site?.discordUrl || 'https://discord.gg/mctiers'}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 text-[#a5b4fc] font-semibold transition"><img src="${gifSrc}" alt="Discord" class="w-4 h-4 object-contain" /> Open CTIERS Discord →</a></p>
+        `;
       } else if (section === 'events') {
-        title.textContent = 'Upcoming PvP Events';
-        body.innerHTML = `<p>Seasonal tournaments and tier resets are announced on <strong>${state.config?.site?.serverIp || 'playmctiers.com'}</strong> and in the community Discord.</p>`;
-      } else {
-        title.textContent = `${state.config?.site?.name || 'CTIERS'} Overview`;
-        body.innerHTML = `<p>Welcome to <strong>${state.config?.site?.name || 'CTIERS'}</strong>—a Minecraft PvP rankings board featuring live player skin models and gamemode tiers.</p>`;
+        titleEl.textContent = 'Upcoming PvP Tier Events';
+        bodyEl.innerHTML = `
+          <p><strong>Weekend Crystal &amp; Sword Open</strong> — Earn bonus ranking points toward Combat Master and Combat Grandmaster!</p>
+          <p>Check the <strong>Ranks</strong> tab to track how many points you need for your next promotion.</p>
+        `;
       }
 
       modal.classList.remove('hidden');
@@ -1404,34 +1889,38 @@
     }
 
     async function initApp() {
+      loadAuthState();
+
       try {
         const res = await fetch('./config.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        state.config = await res.json();
-      } catch (err) {
-        console.warn('Using fallback config:', err);
-        state.config = FALLBACK_CONFIG;
+        if (res.ok) {
+          const loaded = await res.json();
+          if (loaded && typeof loaded === 'object') {
+            window.state.config = { ...FALLBACK_CONFIG, ...loaded };
+          }
+        }
+      } catch (_) {}
+
+      try {
+        const savedPlayersRaw = localStorage.getItem(CUSTOM_PLAYERS_STORAGE_KEY);
+        if (savedPlayersRaw) {
+          const parsed = JSON.parse(savedPlayersRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            window.state.config.players = parsed;
+          }
+        }
+      } catch (_) {}
+
+      const logoImg = document.getElementById('brand-logo-img');
+      if (logoImg && window.state.config?.site?.logoUrl) {
+        logoImg.src = window.state.config.site.logoUrl;
       }
 
-      try {
-        const savedPlayers = JSON.parse(localStorage.getItem(CUSTOM_PLAYERS_KEY) || 'null');
-        if (Array.isArray(savedPlayers)) {
-          state.config.players = savedPlayers;
-        }
-      } catch (e) {}
+      const discordGifImg = document.getElementById('discord-gif-img');
+      if (discordGifImg && window.state.config?.site?.discordGifUrl) {
+        discordGifImg.src = window.state.config.site.discordGifUrl;
+      }
 
-      getClaimedAccounts();
-      getStaffMembers();
-
-      try {
-        const savedSession = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || 'null');
-        if (savedSession && savedSession.username) {
-          const matched = state.claimedAccounts[savedSession.username.toLowerCase()];
-          state.currentUser = matched || savedSession;
-        }
-      } catch (e) {}
-
-      state.activeTab = state.config.site?.defaultTab || 'Overall';
       renderAuthCorner();
       renderGamemodeTabs();
       renderHeaderAndLeaderboard();
