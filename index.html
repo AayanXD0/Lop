@@ -150,15 +150,15 @@
 
     <!-- Top-Right Corner Account Login / Profile Controls -->
     <div id="auth-corner-container" class="absolute top-3 right-3 sm:right-6 z-30 flex items-center gap-2">
-      <!-- Owner Add Player Button (Visible only when logged in as Creuin) -->
+      <!-- Staff / Owner Manage Players Button (Visible for Owner Creuin and Staff members) -->
       <button
         id="owner-panel-btn"
         type="button"
         onclick="openOwnerModal()"
         class="hidden h-9 px-3 rounded-lg bg-gradient-to-r from-amber-500/25 to-red-500/25 hover:from-amber-500/35 hover:to-red-500/35 border border-amber-400/60 text-xs font-bold text-amber-200 items-center gap-1.5 shadow-md transition"
       >
-        <span>👑</span>
-        <span>+ Add Player</span>
+        <span id="manage-btn-icon">👑</span>
+        <span id="manage-btn-label">Manage Players</span>
       </button>
 
       <!-- Top-Right Corner Login Button (Logged Out State) -->
@@ -186,6 +186,7 @@
         <div class="flex items-center gap-1.5">
           <span id="nav-user-name" class="text-xs font-bold text-white">Player</span>
           <span id="nav-owner-tag" class="hidden px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-[9px] font-extrabold uppercase tracking-wider text-amber-300">OWNER</span>
+          <span id="nav-staff-tag" class="hidden px-1.5 py-0.5 rounded bg-sky-500/20 border border-sky-400/50 text-[9px] font-extrabold uppercase tracking-wider text-sky-300">STAFF</span>
         </div>
         <button
           type="button"
@@ -411,13 +412,13 @@
     </div>
   </div>
 
-  <!-- Owner Panel Modal (Exclusive to Creuin) -->
+  <!-- Owner / Staff Panel Modal -->
   <div id="owner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto">
     <div class="w-full max-w-2xl rounded-2xl bg-[#101622] border border-amber-500/40 p-5 shadow-2xl my-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-[10px] font-extrabold text-amber-300 uppercase">Owner Powers</span>
-          <h2 class="text-base font-bold text-white">Creuin Admin Dashboard</h2>
+          <span id="panel-role-badge" class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-[10px] font-extrabold text-amber-300 uppercase">Owner Powers</span>
+          <h2 id="panel-modal-title" class="text-base font-bold text-white">Creuin Admin Dashboard</h2>
         </div>
         <button type="button" onclick="closeOwnerModal()" class="text-slate-400 hover:text-white text-sm px-2 py-1">✕</button>
       </div>
@@ -452,7 +453,42 @@
         </div>
       </form>
 
-      <div class="mt-5 pt-4 border-t border-slate-800">
+      <!-- Owner-Only Staff Management Section -->
+      <div id="owner-staff-section" class="hidden mt-5 pt-4 border-t border-slate-800">
+        <div class="text-xs font-bold text-sky-300 mb-2">Add Staff Member (Can Add &amp; Update Players)</div>
+        <form onsubmit="submitAddStaff(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3">
+          <input
+            id="owner-staff-username"
+            type="text"
+            required
+            maxlength="16"
+            placeholder="Staff MC Username"
+            class="h-9 px-3 rounded-lg bg-[#141b28] border border-slate-700 text-xs text-white focus:outline-none focus:border-sky-400"
+          />
+          <input
+            id="owner-staff-passkey"
+            type="text"
+            minlength="4"
+            placeholder="Optional Passkey (locks MC name)"
+            class="h-9 px-3 rounded-lg bg-[#141b28] border border-slate-700 text-xs text-white focus:outline-none focus:border-sky-400"
+          />
+          <button
+            type="submit"
+            class="h-9 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-xs font-extrabold text-slate-950 transition"
+          >
+            + Add Staff
+          </button>
+        </form>
+        <div id="owner-staff-list" class="max-h-32 overflow-y-auto space-y-1.5 text-xs"></div>
+      </div>
+
+      <!-- Remove Ranked Players List -->
+      <div id="owner-remove-players-section" class="mt-5 pt-4 border-t border-slate-800">
+        <div class="text-xs font-bold text-slate-200 mb-2">Ranked Players (Remove Player)</div>
+        <div id="owner-players-list" class="max-h-36 overflow-y-auto space-y-1.5 text-xs"></div>
+      </div>
+
+      <div id="owner-accounts-section" class="mt-5 pt-4 border-t border-slate-800">
         <div class="text-xs font-bold text-slate-200 mb-2">Claimed &amp; Locked Minecraft Accounts</div>
         <div id="owner-accounts-list" class="max-h-36 overflow-y-auto space-y-1.5 text-xs"></div>
       </div>
@@ -506,6 +542,7 @@
     };
 
     const AUTH_STORAGE_KEY = 'ctiers_claimed_accounts_v1';
+    const STAFF_STORAGE_KEY = 'ctiers_staff_members_v1';
     const SESSION_STORAGE_KEY = 'ctiers_active_session_v1';
     const CUSTOM_PLAYERS_KEY = 'ctiers_custom_players_v1';
     const CUSTOM_PLAYERS_STORAGE_KEY = CUSTOM_PLAYERS_KEY;
@@ -543,7 +580,8 @@
       activeTab: 'Overall',
       searchQuery: '',
       currentUser: null,
-      claimedAccounts: {}
+      claimedAccounts: {},
+      staffMembers: {}
     };
     window.state = state;
 
@@ -593,6 +631,27 @@
       } catch (_) {}
     }
 
+    // Loads staff members appointed by Owner Creuin
+    function getStaffMembers() {
+      let staff = {};
+      try {
+        staff = JSON.parse(localStorage.getItem(STAFF_STORAGE_KEY) || '{}') || {};
+      } catch (_) {
+        staff = {};
+      }
+      state.staffMembers = staff;
+      return staff;
+    }
+
+    // Persists staff members
+    function saveStaffMembers(staff) {
+      const target = staff || state.staffMembers || {};
+      state.staffMembers = target;
+      try {
+        localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(target));
+      } catch (_) {}
+    }
+
     function isOwnerUser() {
       return Boolean(state.currentUser && state.currentUser.username.toLowerCase() === OWNER_USERNAME);
     }
@@ -601,12 +660,25 @@
       return isOwnerUser();
     }
 
-    // Updates the top-right account UI based on login & owner status
+    function isStaffLoggedIn() {
+      if (!state.currentUser) return false;
+      const key = state.currentUser.username.toLowerCase();
+      return key !== OWNER_USERNAME && Boolean(state.staffMembers[key]);
+    }
+
+    function canManagePlayers() {
+      return isOwnerLoggedIn() || isStaffLoggedIn();
+    }
+
+    // Updates the top-right account UI based on login, owner, and staff status
     function updateAuthUI() {
       const loginBtn = document.getElementById('login-open-btn');
       const userBadge = document.getElementById('logged-in-badge');
       const ownerBtn = document.getElementById('owner-panel-btn');
+      const manageIcon = document.getElementById('manage-btn-icon');
+      const manageLabel = document.getElementById('manage-btn-label');
       const ownerTag = document.getElementById('nav-owner-tag');
+      const staffTag = document.getElementById('nav-staff-tag');
 
       if (state.currentUser) {
         const safeName = encodeURIComponent(state.currentUser.username);
@@ -621,14 +693,24 @@
           this.src = `https://minotar.net/avatar/${safeName}/28.png`;
         };
 
+        ownerTag.classList.add('hidden');
+        staffTag.classList.add('hidden');
+
         if (isOwnerLoggedIn()) {
           ownerBtn.classList.remove('hidden');
           ownerBtn.classList.add('flex');
+          manageIcon.textContent = '👑';
+          manageLabel.textContent = 'Manage Players';
           ownerTag.classList.remove('hidden');
+        } else if (isStaffLoggedIn()) {
+          ownerBtn.classList.remove('hidden');
+          ownerBtn.classList.add('flex');
+          manageIcon.textContent = '🛡️';
+          manageLabel.textContent = 'Add Player';
+          staffTag.classList.remove('hidden');
         } else {
           ownerBtn.classList.add('hidden');
           ownerBtn.classList.remove('flex');
-          ownerTag.classList.add('hidden');
         }
       } else {
         loginBtn.classList.remove('hidden');
@@ -637,6 +719,7 @@
         ownerBtn.classList.add('hidden');
         ownerBtn.classList.remove('flex');
         ownerTag.classList.add('hidden');
+        staffTag.classList.add('hidden');
       }
     }
 
@@ -686,7 +769,10 @@
       if (key === OWNER_USERNAME) {
         hintEl.textContent = '👑 Reserved Owner account (Creuin). Enter the Owner passkey to unlock admin powers.';
       } else if (state.claimedAccounts[key]) {
-        hintEl.textContent = '🔒 This Minecraft username is already claimed. Enter its passkey to log in.';
+        const roleLabel = state.staffMembers[key] ? ' (Staff)' : '';
+        hintEl.textContent = `🔒 This Minecraft username${roleLabel} is already claimed. Enter its passkey to log in.`;
+      } else if (state.staffMembers[key]) {
+        hintEl.textContent = '🛡️ Appointed Staff username! Set your passkey to lock this Staff account and add players.';
       } else {
         hintEl.textContent = '✅ Available! Logging in will lock this Minecraft username to your passkey.';
       }
@@ -707,6 +793,7 @@
 
       const key = usernameInput.toLowerCase();
       const existing = state.claimedAccounts[key];
+      const staffEntry = state.staffMembers[key];
 
       if (existing) {
         if (existing.passkey !== passkeyInput) {
@@ -716,10 +803,11 @@
         }
         state.currentUser = existing;
       } else {
+        const role = key === OWNER_USERNAME ? 'owner' : (staffEntry ? 'staff' : 'player');
         const newAccount = {
-          username: usernameInput,
+          username: staffEntry?.username || usernameInput,
           passkey: passkeyInput,
-          role: key === OWNER_USERNAME ? 'owner' : 'player',
+          role,
           claimedAt: new Date().toISOString()
         };
         state.claimedAccounts[key] = newAccount;
@@ -735,8 +823,10 @@
       closeLoginModal();
       showToast(
         isOwnerLoggedIn()
-          ? '👑 Logged in as Owner Creuin! You can now add players.'
-          : `⛏️ Logged in & locked MC account: ${state.currentUser.username}`
+          ? '👑 Logged in as Owner Creuin! You can manage players & staff.'
+          : isStaffLoggedIn()
+            ? `🛡️ Logged in as Staff (${state.currentUser.username})! You can add & update players.`
+            : `⛏️ Logged in & locked MC account: ${state.currentUser.username}`
       );
     }
 
@@ -749,11 +839,34 @@
       showToast('Logged out of Minecraft account.');
     }
 
-    // Opens Owner dashboard for Creuin
+    // Opens Owner / Staff dashboard
     function openOwnerModal() {
-      if (!isOwnerLoggedIn()) {
-        showToast('Only Owner Creuin can access the Add Player panel.');
+      if (!canManagePlayers()) {
+        showToast('Only Owner Creuin or Staff members can access this panel.');
         return;
+      }
+
+      const isOwner = isOwnerLoggedIn();
+      const roleBadge = document.getElementById('panel-role-badge');
+      const modalTitle = document.getElementById('panel-modal-title');
+      const staffSection = document.getElementById('owner-staff-section');
+      const removePlayersSection = document.getElementById('owner-remove-players-section');
+      const accountsSection = document.getElementById('owner-accounts-section');
+
+      if (isOwner) {
+        roleBadge.textContent = 'Owner Powers';
+        roleBadge.className = 'px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-[10px] font-extrabold text-amber-300 uppercase';
+        modalTitle.textContent = 'Creuin Admin Dashboard';
+        staffSection.classList.remove('hidden');
+        removePlayersSection.classList.remove('hidden');
+        accountsSection.classList.remove('hidden');
+      } else {
+        roleBadge.textContent = 'Staff Access';
+        roleBadge.className = 'px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/50 text-[10px] font-extrabold text-sky-300 uppercase';
+        modalTitle.textContent = 'Staff Player Panel';
+        staffSection.classList.add('hidden');
+        removePlayersSection.classList.add('hidden');
+        accountsSection.classList.add('hidden');
       }
 
       const order = state.config?.overallGamemodeOrder || ['Sword', 'Axe', 'Pot', 'UHC', 'SMP', 'Mace', 'NethOP', 'Crystal'];
@@ -769,7 +882,12 @@
         </div>
       `).join('');
 
-      renderOwnerAccountsList();
+      if (isOwner) {
+        renderOwnerStaffList();
+        renderOwnerPlayersList();
+        renderOwnerAccountsList();
+      }
+
       const modal = document.getElementById('owner-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
@@ -781,17 +899,153 @@
       modal.classList.remove('flex');
     }
 
+    // Allows Owner Creuin to add a Staff member who can add players
+    function submitAddStaff(event) {
+      event.preventDefault();
+      if (!isOwnerLoggedIn()) return;
+
+      const rawName = document.getElementById('owner-staff-username').value.trim();
+      const rawPasskey = document.getElementById('owner-staff-passkey').value.trim();
+
+      if (!/^[A-Za-z0-9_]{3,16}$/.test(rawName)) {
+        showToast('Enter a valid 3–16 character Minecraft username for Staff.');
+        return;
+      }
+
+      const key = rawName.toLowerCase();
+      if (key === OWNER_USERNAME) {
+        showToast('Creuin is already the Owner.');
+        return;
+      }
+
+      state.staffMembers[key] = {
+        username: rawName,
+        role: 'staff',
+        addedBy: 'Creuin',
+        addedAt: new Date().toISOString()
+      };
+      saveStaffMembers();
+
+      if (rawPasskey.length >= 4) {
+        state.claimedAccounts[key] = {
+          username: rawName,
+          passkey: rawPasskey,
+          role: 'staff',
+          claimedAt: new Date().toISOString()
+        };
+        saveClaimedAccounts();
+        renderOwnerAccountsList();
+      }
+
+      document.getElementById('owner-staff-username').value = '';
+      document.getElementById('owner-staff-passkey').value = '';
+      renderOwnerStaffList();
+      showToast(`Added ${rawName} as Staff! They can now add & update players.`);
+    }
+
+    function renderOwnerStaffList() {
+      const listEl = document.getElementById('owner-staff-list');
+      const entries = Object.values(state.staffMembers || {});
+
+      if (!entries.length) {
+        listEl.innerHTML = `<div class="text-slate-500 py-1.5">No staff members added yet.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = entries.map(member => {
+        const key = member.username.toLowerCase();
+        return `
+          <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800 text-xs">
+            <div class="flex items-center gap-2">
+              <img src="https://mc-heads.net/avatar/${encodeURIComponent(member.username)}/20" alt="" class="w-4 h-4 rounded ctiers-pixel-logo" />
+              <span class="font-bold text-white">${member.username}</span>
+              <span class="px-1.5 py-0.2 rounded bg-sky-500/15 border border-sky-400/40 text-[10px] font-bold text-sky-300">STAFF</span>
+            </div>
+            <button
+              type="button"
+              onclick="removeStaffMember('${key}')"
+              class="text-[11px] font-semibold text-rose-400 hover:text-rose-300"
+            >
+              Remove Staff
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function removeStaffMember(key) {
+      if (!isOwnerLoggedIn()) return;
+      const target = state.staffMembers[key];
+      delete state.staffMembers[key];
+      saveStaffMembers();
+      if (state.claimedAccounts[key] && state.claimedAccounts[key].role === 'staff') {
+        state.claimedAccounts[key].role = 'player';
+        saveClaimedAccounts();
+        renderOwnerAccountsList();
+      }
+      renderOwnerStaffList();
+      showToast(`Removed Staff role from ${target?.username || key}`);
+    }
+
+    function renderOwnerPlayersList() {
+      const listEl = document.getElementById('owner-players-list');
+      const players = Array.isArray(state.config?.players) ? state.config.players : [];
+
+      if (!players.length) {
+        listEl.innerHTML = `<div class="text-slate-500 py-2">No ranked players available.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = players.map(player => `
+        <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800 text-xs">
+          <div class="flex items-center gap-2 min-w-0">
+            <img src="https://mc-heads.net/avatar/${encodeURIComponent(player.username)}/20" alt="" class="w-4 h-4 rounded ctiers-pixel-logo shrink-0" />
+            <span class="font-bold text-white truncate">${player.username}</span>
+            <span class="text-[10px] text-slate-400 shrink-0">(${Number(player.points || 0)} pts)</span>
+          </div>
+          <button
+            type="button"
+            onclick="removeRankedPlayer('${encodeURIComponent(player.username)}')"
+            class="px-2 py-0.5 rounded bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-[11px] font-semibold text-rose-300 transition shrink-0"
+          >
+            Remove
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // Removes a player from the rankings (Creuin Owner action)
+    function removeRankedPlayer(encodedUsername) {
+      if (!isOwnerLoggedIn()) return;
+      const targetName = decodeURIComponent(encodedUsername);
+      const existingPlayers = Array.isArray(state.config?.players) ? state.config.players : [];
+      const updatedPlayers = existingPlayers
+        .filter(p => p.username.toLowerCase() !== targetName.toLowerCase())
+        .sort((a, b) => Number(b.points || 0) - Number(a.points || 0))
+        .map((p, idx) => ({ ...p, rank: idx + 1 }));
+
+      state.config.players = updatedPlayers;
+      try {
+        localStorage.setItem(CUSTOM_PLAYERS_STORAGE_KEY, JSON.stringify(updatedPlayers));
+      } catch (_) {}
+
+      renderOwnerPlayersList();
+      renderHeaderAndLeaderboard();
+      showToast(`Removed ${targetName} from CTIERS rankings.`);
+    }
+
     function renderOwnerAccountsList() {
       const listEl = document.getElementById('owner-accounts-list');
       const entries = Object.values(state.claimedAccounts);
       listEl.innerHTML = entries.map(acc => {
         const isOwner = acc.username.toLowerCase() === OWNER_USERNAME;
+        const isStaff = Boolean(state.staffMembers[acc.username.toLowerCase()]);
         return `
           <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#141b28] border border-slate-800 text-xs">
             <div class="flex items-center gap-2">
               <img src="https://mc-heads.net/avatar/${encodeURIComponent(acc.username)}/20" alt="" class="w-4 h-4 rounded ctiers-pixel-logo" />
               <span class="font-bold text-white">${acc.username}</span>
-              ${isOwner ? '<span class="text-[10px] font-bold text-amber-400">(OWNER)</span>' : '<span class="text-[10px] text-slate-400">Locked</span>'}
+              ${isOwner ? '<span class="text-[10px] font-bold text-amber-400">(OWNER)</span>' : (isStaff ? '<span class="text-[10px] font-bold text-sky-400">(STAFF)</span>' : '<span class="text-[10px] text-slate-400">Locked</span>')}
             </div>
             ${isOwner
               ? '<span class="text-[10px] text-slate-500">Protected</span>'
@@ -811,10 +1065,10 @@
       showToast(`Unlocked username: ${target?.username || key}`);
     }
 
-    // Adds or updates a player in the rankings board (Creuin Owner action)
+    // Adds or updates a player in the rankings board (Owner or Staff action)
     function submitAddPlayer(event) {
       event.preventDefault();
-      if (!isOwnerLoggedIn()) return;
+      if (!canManagePlayers()) return;
 
       const username = document.getElementById('owner-player-username').value.trim();
       const title = document.getElementById('owner-player-title').value.trim() || 'Combat Ace';
@@ -858,6 +1112,9 @@
 
       document.getElementById('owner-player-username').value = '';
       document.getElementById('owner-player-points').value = '';
+      if (isOwnerLoggedIn()) {
+        renderOwnerPlayersList();
+      }
       closeOwnerModal();
       renderHeaderAndLeaderboard();
       showToast(`Saved ${username} (${finalPoints} pts) to CTIERS rankings!`);
@@ -1158,19 +1415,22 @@
 
       try {
         const savedPlayers = JSON.parse(localStorage.getItem(CUSTOM_PLAYERS_KEY) || 'null');
-        if (Array.isArray(savedPlayers) && savedPlayers.length) {
+        if (Array.isArray(savedPlayers)) {
           state.config.players = savedPlayers;
         }
       } catch (e) {}
 
+      getClaimedAccounts();
+      getStaffMembers();
+
       try {
         const savedSession = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || 'null');
         if (savedSession && savedSession.username) {
-          state.currentUser = savedSession;
+          const matched = state.claimedAccounts[savedSession.username.toLowerCase()];
+          state.currentUser = matched || savedSession;
         }
       } catch (e) {}
 
-      getClaimedAccounts();
       state.activeTab = state.config.site?.defaultTab || 'Overall';
       renderAuthCorner();
       renderGamemodeTabs();
