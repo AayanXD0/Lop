@@ -6,6 +6,7 @@
 "https://i.ibb.co/0jzBg7q7/Ctiers-11-23-2026.png",
 "https://i.ibb.co/0jzBg7q7/logo.png"
 ],
+"discordGifUrl": "./72024-discord.gif",
 "serverIp": "playmctiers.com",
 "discordUrl": "https://discord.gg/mctiers",
 "totalRankedPlayers": 16196,
@@ -27,7 +28,6 @@
 "gamemodeIcons": {
 "Overall": { "key": "Trophy" },
 "LTMs": { "key": "Sparkles" },
-"2v2": { "key": "Sparkles" },
 "Crystal": { "url": "https://mctiers.gg/tier_icons/vanilla.svg", "key": "Crystal" },
 "UHC": { "url": "https://mctiers.gg/tier_icons/uhc.svg", "key": "UHC" },
 "Pot": { "url": "https://mctiers.gg/tier_icons/pot.svg", "key": "Pot" },
@@ -66,16 +66,7 @@
 "title": "Combat Grandmaster",
 "points": 450,
 "skin": { "hair": "#38bdf8", "skin": "#f5cba7", "accent": "#0284c7", "visor": "#e0f2fe" },
-"tiers": {
-"Sword": "HT1",
-"Axe": "HT1",
-"Pot": "HT1",
-"UHC": "HT1",
-"SMP": "HT1",
-"Mace": "HT1",
-"NethOP": "LT1",
-"Crystal": "LT1"
-}
+"tiers": { "Sword": "HT1", "Axe": "HT1", "Pot": "HT1", "UHC": "HT1", "SMP": "HT1", "Mace": "HT1", "NethOP": "LT1", "Crystal": "LT1" }
 },
 {
 "rank": 2,
@@ -83,16 +74,7 @@
 "title": "Combat Master",
 "points": 330,
 "skin": { "hair": "#3b2314", "skin": "#e5b887", "accent": "#15803d", "visor": "#5c3a21" },
-"tiers": {
-"Sword": "HT3",
-"Axe": "HT1",
-"Pot": "HT1",
-"UHC": "HT1",
-"SMP": "HT1",
-"Mace": "HT1",
-"NethOP": "LT2",
-"Crystal": "LT2"
-}
+"tiers": { "Sword": "HT3", "Axe": "HT1", "Pot": "HT1", "UHC": "HT1", "SMP": "HT1", "Mace": "HT1", "NethOP": "LT2", "Crystal": "LT2" }
 },
 {
 "rank": 3,
@@ -100,16 +82,7 @@
 "title": "Combat Master",
 "points": 326,
 "skin": { "hair": "#f8fafc", "skin": "#bae6fd", "accent": "#0284c7", "visor": "#1e293b" },
-"tiers": {
-"Sword": "LT1",
-"Axe": "LT3",
-"Pot": "HT1",
-"UHC": "HT1",
-"SMP": "HT1",
-"Mace": "LT1",
-"NethOP": "LT1",
-"Crystal": "LT2"
-}
+"tiers": { "Sword": "LT1", "Axe": "LT3", "Pot": "HT1", "UHC": "HT1", "SMP": "HT1", "Mace": "LT1", "NethOP": "LT1", "Crystal": "LT2" }
 },
 {
 "rank": 4,
@@ -117,16 +90,7 @@
 "title": "Combat Master",
 "points": 290,
 "skin": { "hair": "#111827", "skin": "#f8fafc", "accent": "#374151", "visor": "#f8fafc" },
-"tiers": {
-"Sword": "LT3",
-"Axe": "HT1",
-"Pot": "HT1",
-"UHC": "HT1",
-"SMP": "HT1",
-"Mace": "HT2",
-"NethOP": "LT2",
-"Crystal": "LT2"
-}
+"tiers": { "Sword": "LT3", "Axe": "HT1", "Pot": "HT1", "UHC": "HT1", "SMP": "HT1", "Mace": "HT2", "NethOP": "LT2", "Crystal": "LT2" }
 },
 {
 "rank": 5,
@@ -134,16 +98,7 @@
 "title": "Combat Master",
 "points": 260,
 "skin": { "hair": "#18181b", "skin": "#71717a", "accent": "#27272a", "visor": "#f4f4f5" },
-"tiers": {
-"Sword": "LT3",
-"Axe": "HT4",
-"Pot": "HT1",
-"UHC": "HT1",
-"SMP": "HT1",
-"Mace": "HT2",
-"NethOP": "LT2",
-"Crystal": "LT2"
-}
+"tiers": { "Sword": "LT3", "Axe": "HT4", "Pot": "HT1", "UHC": "HT1", "SMP": "HT1", "Mace": "HT2", "NethOP": "LT2", "Crystal": "LT2" }
 },
 {
 "rank": 6,
@@ -151,16 +106,7 @@
 "title": "Combat Ace",
 "points": 226,
 "skin": { "hair": "#0f172a", "skin": "#eab308", "accent": "#dc2626", "visor": "#facc15" },
-"tiers": {
-"Sword": "HT3",
-"Axe": "LT3",
-"Pot": "LT3",
-"UHC": "HT1",
-"SMP": "HT1",
-"Mace": "HT2",
-"NethOP": "LT2",
-"Crystal": "LT2"
-}
+"tiers": { "Sword": "HT3", "Axe": "LT3", "Pot": "LT3", "UHC": "HT1", "SMP": "HT1", "Mace": "HT2", "NethOP": "LT2", "Crystal": "LT2" }
 },
 {
 "rank": 6,
@@ -168,16 +114,7 @@
 "title": "Combat Ace",
 "points": 226,
 "skin": { "hair": "#f9a8d4", "skin": "#fbcfe8", "accent": "#db2777", "visor": "#1f2937" },
-"tiers": {
-"Sword": "HT3",
-"Axe": "HT3",
-"Pot": "HT3",
-"UHC": "HT1",
-"SMP": "HT1",
-"Mace": "HT1",
-"NethOP": "LT2",
-"Crystal": null
-}
+"tiers": { "Sword": "HT3", "Axe": "HT3", "Pot": "HT3", "UHC": "HT1", "SMP": "HT1", "Mace": "HT1", "NethOP": "LT2", "Crystal": null }
 },
 {
 "rank": 8,
@@ -185,16 +122,7 @@
 "title": "Combat Ace",
 "points": 196,
 "skin": { "hair": "#090d16", "skin": "#ea580c", "accent": "#1e293b", "visor": "#fb923c" },
-"tiers": {
-"Sword": "HT3",
-"Axe": "HT3",
-"Pot": "HT3",
-"UHC": "LT3",
-"SMP": "LT2",
-"Mace": "LT2",
-"NethOP": "LT2",
-"Crystal": "LT2"
-}
+"tiers": { "Sword": "HT3", "Axe": "HT3", "Pot": "HT3", "UHC": "LT3", "SMP": "LT2", "Mace": "LT2", "NethOP": "LT2", "Crystal": "LT2" }
 },
 {
 "rank": 9,
@@ -202,16 +130,7 @@
 "title": "Combat Ace",
 "points": 186,
 "skin": { "hair": "#451a03", "skin": "#d97706", "accent": "#78350f", "visor": "#fef3c7" },
-"tiers": {
-"Sword": "LT3",
-"Axe": "LT4",
-"Pot": "HT1",
-"UHC": "HT1",
-"SMP": "HT2",
-"Mace": "LT2",
-"NethOP": null,
-"Crystal": null
-}
+"tiers": { "Sword": "LT3", "Axe": "LT4", "Pot": "HT1", "UHC": "HT1", "SMP": "HT2", "Mace": "LT2", "NethOP": null, "Crystal": null }
 },
 {
 "rank": 10,
@@ -219,16 +138,7 @@
 "title": "Combat Ace",
 "points": 177,
 "skin": { "hair": "#030712", "skin": "#111827", "accent": "#1f2937", "visor": "#6b7280" },
-"tiers": {
-"Sword": "HT3",
-"Axe": "HT3",
-"Pot": "HT3",
-"UHC": "LT3",
-"SMP": "LT3",
-"Mace": "LT3",
-"NethOP": "LT3",
-"Crystal": "HT1"
-}
+"tiers": { "Sword": "HT3", "Axe": "HT3", "Pot": "HT3", "UHC": "LT3", "SMP": "LT3", "Mace": "LT3", "NethOP": "LT3", "Crystal": "HT1" }
 }
 ]
 }
