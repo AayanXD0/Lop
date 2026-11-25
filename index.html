@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CTIERS — Overall Minecraft PvP Rankings</title>
+  <title>C-Tiers — Overall Minecraft PvP Rankings</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -150,18 +150,18 @@
       onclick="setActiveTab('Overall'); return false;"
       class="absolute top-3 left-3 sm:left-6 z-30 inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-[#121824]/95 border border-slate-700/70 shadow-2xl shrink-0 select-none overflow-visible whitespace-nowrap"
       style="width: auto; max-width: none; min-width: max-content;"
-      aria-label="CTIERS"
+      aria-label="ONEMIRROR"
     >
       <img
         id="brand-logo-img"
-        src="./Ctiers-11-23-2026.png"
-        alt="CTIERS"
+        src="./onemirror"
+        alt="C-Tiers"
         class="ctiers-pixel-logo h-11 sm:h-12 w-auto max-w-none shrink-0 object-contain block"
         style="width: auto; max-width: none; height: 44px;"
         onerror="handleLogoError(this);"
       />
       <span id="brand-logo-fallback" class="hidden ctiers-pixel-logo text-lg sm:text-xl font-black tracking-wider text-red-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)] whitespace-nowrap">
-        CTIERS
+        C-Tiers
       </span>
     </a>
 
@@ -680,11 +680,13 @@
 
     const FALLBACK_CONFIG = {
       site: {
-        name: 'CTIERS',
-        logoUrl: './Ctiers-11-23-2026.png',
+        name: 'C-Tiers',
+        logoUrl: './onemirror',
         logoFallbackUrls: [
-          'https://i.ibb.co/0jzBg7q7/Ctiers-11-23-2026.png',
-          'https://i.ibb.co/0jzBg7q7/logo.png'
+          './onemirror.png',
+          './onemirror.svg',
+          './onemirror.webp',
+          './Ctiers-11-23-2026.png'
         ],
         discordGifUrl: './72024-discord.gif',
         serverIp: 'playmctiers.com',
@@ -1858,17 +1860,17 @@
       const bodyEl = document.getElementById('info-modal-body');
 
       if (section === 'home') {
-        titleEl.textContent = 'Welcome to CTIERS';
+        titleEl.textContent = 'Welcome to C-Tiers';
         bodyEl.innerHTML = `
-          <p><strong>CTIERS</strong> tracks competitive Minecraft PvP player tiers across 8 core gamemodes including Sword, Axe, Pot, UHC, SMP, Mace, NethOP, and Crystal.</p>
+          <p><strong>C-Tiers</strong> tracks competitive Minecraft PvP player tiers across 8 core gamemodes including Sword, Axe, Pot, UHC, SMP, Mace, NethOP, and Crystal.</p>
           <p>Log in with your Minecraft username at the top right to claim and lock your profile, or click <strong>Ranks</strong> to see exact point thresholds for every rank.</p>
         `;
       } else if (section === 'discords') {
         const gifSrc = window.state.config?.site?.discordGifUrl || './72024-discord.gif';
-        titleEl.innerHTML = `<span class="inline-flex items-center gap-2"><img src="${gifSrc}" alt="Discord" class="w-5 h-5 object-contain" /> Official CTIERS Discord Servers</span>`;
+        titleEl.innerHTML = `<span class="inline-flex items-center gap-2"><img src="${gifSrc}" alt="Discord" class="w-5 h-5 object-contain" /> Official C-Tiers Discord Servers</span>`;
         bodyEl.innerHTML = `
           <p>Join the official Discord community to schedule tier tests, view match results, and get notified about upcoming tournaments.</p>
-          <p><a href="${window.state.config?.site?.discordUrl || 'https://discord.gg/mctiers'}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 text-[#a5b4fc] font-semibold transition"><img src="${gifSrc}" alt="Discord" class="w-4 h-4 object-contain" /> Open CTIERS Discord →</a></p>
+          <p><a href="${window.state.config?.site?.discordUrl || 'https://discord.gg/mctiers'}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 text-[#a5b4fc] font-semibold transition"><img src="${gifSrc}" alt="Discord" class="w-4 h-4 object-contain" /> Open C-Tiers Discord →</a></p>
         `;
       } else if (section === 'events') {
         titleEl.textContent = 'Upcoming PvP Tier Events';
